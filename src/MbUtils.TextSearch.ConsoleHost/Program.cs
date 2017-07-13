@@ -16,13 +16,14 @@ namespace MbUtils.TextSearch.ConsoleHost
                 return;
             }
 
-            // create business logic class
+            // wire up the application. In a bigger environment this part would be the DI container setup
             var loggerFactory = new LoggerFactory();
-            loggerFactory.AddConsole();
+            loggerFactory.AddConsole(LogLevel.Debug);
             var filePathProvider = new FilePathProvider(loggerFactory);
-            var mainLogic = new MainLogic(loggerFactory, filePathProvider);
+            var fileInspector = new FileInspector(loggerFactory, 1024, true);
+            var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector);
 
-            // input parameters
+            // get the input parameters
             var inputFolderPath = args[0];
             var searchTerm = args[1];
             var outputFilePath = args[2];

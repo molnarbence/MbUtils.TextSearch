@@ -7,6 +7,6 @@ namespace MbUtils.TextSearch.Domain
 {
     public interface IFileInspector
     {
-        Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm);
+        int GetNumberOfMatches(string filePath, string searchTerm);
     }
 }

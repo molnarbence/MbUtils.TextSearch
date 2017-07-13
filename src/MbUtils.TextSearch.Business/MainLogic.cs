@@ -11,11 +11,13 @@ namespace MbUtils.TextSearch.Business
     {
         readonly ILogger<MainLogic> logger;
         readonly IFilePathProvider filePathProvider;
+        readonly IFileInspector fileInspector;
 
-        public MainLogic(ILoggerFactory loggerFactory, IFilePathProvider filePathProvider)
+        public MainLogic(ILoggerFactory loggerFactory, IFilePathProvider filePathProvider, IFileInspector fileInspector)
         {
             logger = loggerFactory.CreateLogger<MainLogic>();
             this.filePathProvider = filePathProvider;
+            this.fileInspector = fileInspector;
         }
 
         public void Search(string inputFolderPath, string searchTerm, string outputFilePath)
@@ -29,7 +31,8 @@ namespace MbUtils.TextSearch.Business
 
             foreach (var item in filePaths)
             {
-                logger.LogInformation(item);
+                var matchCount = fileInspector.GetNumberOfMatches(item, searchTerm);
+                logger.LogInformation($"Number of matches in {item}: {matchCount}");
             }
         }
 
@@ -54,6 +57,9 @@ namespace MbUtils.TextSearch.Business
         {
             try
             {
+                var fileInfo = new FileInfo(outputFilePath);
+                if (!fileInfo.Directory.Exists)
+                    fileInfo.Directory.Create();
                 File.WriteAllText(outputFilePath, "test");
             }
             catch (Exception ex)
