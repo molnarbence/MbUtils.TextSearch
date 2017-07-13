@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MbUtils.TextSearch.Business
 {
@@ -35,12 +36,10 @@ namespace MbUtils.TextSearch.Business
             // get file paths (as enumerable)
             var filePaths = filePathProvider.GetFilePaths(inputFolderPath);
 
-            foreach (var item in filePaths)
-            {
-                var matchCount = fileInspector.GetNumberOfMatches(item, searchTerm);
-                logger.LogInformation($"Number of matches in {item}: {matchCount}");
-                resultRepo.SaveResult(new SearchResult { FilePath = item, MatchCount = matchCount });
-            }
+            Parallel.ForEach(filePaths, new ParallelOptions() { MaxDegreeOfParallelism = 2 }, (filePath) => {
+                var matchCount = fileInspector.GetNumberOfMatchesAsync(filePath, searchTerm).Result;
+                resultRepo.SaveResult(new SearchResult { FilePath = filePath, MatchCount = matchCount });
+            });
         }
 
         #region Input validation

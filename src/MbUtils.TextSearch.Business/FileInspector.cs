@@ -23,26 +23,23 @@ namespace MbUtils.TextSearch.Business
             encoding = isUtf8 ? Encoding.UTF8 : Encoding.ASCII;
         }
 
-        public int GetNumberOfMatches(string filePath, string searchTerm)
+        public async Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm)
         {
             var ret = 0;
             var buffer = new byte[bufferSize];
 
             using (var fs = File.OpenRead(filePath))
             {
-                // get file content as string chunks
-                var chunks = GetChunksAsString(fs);
-
                 var searchTermOffset = 0;
+                var chunk = default(string);
 
-                // enumerate through the string chunks
-                foreach (var chunk in chunks)
+                while ((chunk = await GetChunksAsStringAsync(fs)) != null)
                 {
                     // iterate through the characters of the chunk
                     for (int chunkOffset = 0; chunkOffset < chunk.Length; chunkOffset++)
                     {
                         // check if characters match
-                        if(chunk[chunkOffset] == searchTerm[searchTermOffset])
+                        if (chunk[chunkOffset] == searchTerm[searchTermOffset])
                         {
                             // characters match, so let's increment the pointer of the searchterm
                             searchTermOffset++;
@@ -70,15 +67,15 @@ namespace MbUtils.TextSearch.Business
             return ret;
         }
 
-        private IEnumerable<string> GetChunksAsString(Stream inputStream)
+        private async Task<string> GetChunksAsStringAsync(Stream inputStream)
         {
             var buffer = new byte[bufferSize];
 
             var readBytesCount = 0;
-            while((readBytesCount = inputStream.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                yield return encoding.GetString(buffer, 0, readBytesCount);
-            }
+            if ((readBytesCount = await inputStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                return encoding.GetString(buffer, 0, readBytesCount);
+            else
+                return null;
         }
     }
 }
