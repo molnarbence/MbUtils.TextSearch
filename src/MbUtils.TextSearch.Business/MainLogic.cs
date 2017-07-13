@@ -12,19 +12,25 @@ namespace MbUtils.TextSearch.Business
         readonly ILogger<MainLogic> logger;
         readonly IFilePathProvider filePathProvider;
         readonly IFileInspector fileInspector;
+        readonly IResultRepository resultRepo;
+             
 
-        public MainLogic(ILoggerFactory loggerFactory, IFilePathProvider filePathProvider, IFileInspector fileInspector)
+        public MainLogic(
+            ILoggerFactory loggerFactory, 
+            IFilePathProvider filePathProvider, 
+            IFileInspector fileInspector,
+            IResultRepository resultRepo)
         {
             logger = loggerFactory.CreateLogger<MainLogic>();
             this.filePathProvider = filePathProvider;
             this.fileInspector = fileInspector;
+            this.resultRepo = resultRepo;
         }
 
-        public void Search(string inputFolderPath, string searchTerm, string outputFilePath)
+        public void Search(string inputFolderPath, string searchTerm)
         {
             // validate input
             ValidateInputFolderPath(inputFolderPath);
-            ValidateOutputFile(outputFilePath);
 
             // get file paths (as enumerable)
             var filePaths = filePathProvider.GetFilePaths(inputFolderPath);
@@ -33,6 +39,7 @@ namespace MbUtils.TextSearch.Business
             {
                 var matchCount = fileInspector.GetNumberOfMatches(item, searchTerm);
                 logger.LogInformation($"Number of matches in {item}: {matchCount}");
+                resultRepo.SaveResult(new SearchResult { FilePath = item, MatchCount = matchCount });
             }
         }
 
@@ -51,22 +58,6 @@ namespace MbUtils.TextSearch.Business
             }
             if (!inputFolderInfo.Exists)
                 throw new ArgumentException($"Input folder {inputFolderPath} doesn't exist", nameof(inputFolderPath));
-        }
-
-        private void ValidateOutputFile(string outputFilePath)
-        {
-            try
-            {
-                var fileInfo = new FileInfo(outputFilePath);
-                if (!fileInfo.Directory.Exists)
-                    fileInfo.Directory.Create();
-                File.WriteAllText(outputFilePath, "test");
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug(ex.Message);
-                throw new ArgumentException("Output file cannot be written");
-            }
         }
         #endregion
     }

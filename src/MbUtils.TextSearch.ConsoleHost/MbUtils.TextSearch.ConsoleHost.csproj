@@ -9,6 +9,11 @@
     <ProjectReference Include="..\MbUtils.TextSearch.Domain\MbUtils.TextSearch.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="appoutput\" />
+    <Folder Include="appoutput\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp1.1</TargetFramework>

@@ -14,6 +14,8 @@ namespace MbUtils.TextSearch.Business
         readonly Encoding encoding;
         readonly ILogger<FileInspector> logger;
 
+        public long TotalReadBytesCount { get; private set; }
+
         public FileInspector(ILoggerFactory loggerFactory, int bufferSize, bool isUtf8)
         {
             logger = loggerFactory.CreateLogger<FileInspector>();
@@ -60,6 +62,7 @@ namespace MbUtils.TextSearch.Business
                             searchTermOffset = 0;
                         }
                     }
+                    TotalReadBytesCount += chunk.Length;
                 }
                
             }
