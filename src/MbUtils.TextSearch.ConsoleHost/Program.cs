@@ -21,7 +21,7 @@ namespace MbUtils.TextSearch.ConsoleHost
             var searchTerm = args[1];
             var outputFilePath = args[2];
 
-            const int bufferSize = 2 * 1024 * 1024;
+            const int bufferSize = 1 * 1024 * 1024;
             
             try
             {

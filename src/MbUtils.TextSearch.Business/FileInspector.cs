@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MbUtils.TextSearch.Business
@@ -13,8 +15,15 @@ namespace MbUtils.TextSearch.Business
         readonly int bufferSize;
         readonly Encoding encoding;
         readonly ILogger<FileInspector> logger;
+        object lockObj = new object();
 
-        public long TotalReadBytesCount { get; private set; }
+        long totalReadBytesCount = 0;
+
+        public void AddReadBytesCount(long count)
+        {
+            Interlocked.Add(ref totalReadBytesCount, count);
+        }
+        public long TotalReadBytesCount { get { return totalReadBytesCount; } }
 
         public FileInspector(ILoggerFactory loggerFactory, int bufferSize, bool isUtf8)
         {
@@ -26,40 +35,56 @@ namespace MbUtils.TextSearch.Business
         public async Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm)
         {
             var ret = 0;
-            var buffer = new byte[bufferSize];
+            var searchTermLength = searchTerm.Length;
+            var regex = new Regex(Regex.Escape(searchTerm));
 
             using (var fs = File.OpenRead(filePath))
             {
-                var searchTermOffset = 0;
                 var chunk = default(string);
+
+                var partialMatchFromPreviousChunk = string.Empty;
 
                 while ((chunk = await GetChunksAsStringAsync(fs)) != null)
                 {
-                    // iterate through the characters of the chunk
-                    for (int chunkOffset = 0; chunkOffset < chunk.Length; chunkOffset++)
+                    // check if we have partial match from previous chunk
+                    if(!string.IsNullOrEmpty(partialMatchFromPreviousChunk))
                     {
-                        // check if characters match
-                        if (chunk[chunkOffset] == searchTerm[searchTermOffset])
-                        {
-                            // characters match, so let's increment the pointer of the searchterm
-                            searchTermOffset++;
+                        // concatenate characters from the current chunk
+                        var potentialMatch = string.Concat(partialMatchFromPreviousChunk, chunk.Substring(0, searchTermLength - partialMatchFromPreviousChunk.Length));
 
-                            // check if we reached the end of searchterm
-                            if (searchTermOffset == searchTerm.Length)
-                            {
-                                // we found a match, so increment the count
-                                ret++;
-                                // set the searchterm pointer back to the beginning
-                                searchTermOffset = 0;
-                            }
-                        }
-                        else
+                        // check if it's a match
+                        if (string.Compare(searchTerm, potentialMatch, true) == 0)
+                            ret++;
+
+                        // reset partial match
+                        partialMatchFromPreviousChunk = string.Empty;
+                    }
+
+                    // some variables to remember
+                    var count = regex.Matches(chunk).Count;
+                    var chunkLength = chunk.Length;
+
+                    // need to check at the end of the chunk if we can find a next match
+                    for (int i = 1; i < searchTermLength; i++)
+                    {
+                        // construct substrings
+                        var subSearchTerm = searchTerm.Substring(0, searchTerm.Length - i);
+                        var subChunk = chunk.Substring(chunkLength - subSearchTerm.Length);
+
+                        // check if it's a match
+                        if(string.Compare(subSearchTerm, subChunk, true) == 0)
                         {
-                            // don't match so set the searchterm pointer back to the beginning
-                            searchTermOffset = 0;
+                            // found a match
+                            partialMatchFromPreviousChunk = subChunk;
+                            break;
                         }
                     }
-                    TotalReadBytesCount += chunk.Length;
+
+                    // increment match count
+                    ret += count;
+
+                    // add read bytes count (for statistics)
+                    AddReadBytesCount(chunkLength);
                 }
                
             }
@@ -69,6 +94,8 @@ namespace MbUtils.TextSearch.Business
 
         private async Task<string> GetChunksAsStringAsync(Stream inputStream)
         {
+            // TODO: UTF-8 can be multibyte, so it can happen, that one or more byte won't be read at the end
+            // We need to address this somehow
             var buffer = new byte[bufferSize];
 
             var readBytesCount = 0;
