@@ -15,11 +15,10 @@ namespace MbUtils.TextSearch.Business
         readonly int bufferSize;
         readonly Encoding encoding;
         readonly ILogger<FileInspector> logger;
-        object lockObj = new object();
-
+        
         long totalReadBytesCount = 0;
 
-        public void AddReadBytesCount(long count)
+        private void AddReadBytesCount(long count)
         {
             Interlocked.Add(ref totalReadBytesCount, count);
         }
@@ -34,25 +33,27 @@ namespace MbUtils.TextSearch.Business
 
         public async Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm)
         {
+            // variables to remember
             var ret = 0;
             var searchTermLength = searchTerm.Length;
             var regex = new Regex(Regex.Escape(searchTerm));
-            var buffer = new char[bufferSize];
+            var buffer = new char[bufferSize]; // to reuse buffer multiple times
 
             using (var fs = File.OpenRead(filePath))
             {
                 using (var sr = new StreamReader(fs, encoding, true))
                 {
-                    var chunk = default(string);
+                    var currentChunk = default(string);
                     var partialMatchFromPreviousChunk = default(string);
 
-                    while ((chunk = await ReadNextChunkAsync(sr, buffer)) != null)
+                    while ((currentChunk = await ReadNextChunkAsync(sr, buffer)) != null)
                     {
                         // check if we have partial match from previous chunk
                         if (!string.IsNullOrEmpty(partialMatchFromPreviousChunk))
                         {
-                            // concatenate characters from the current chunk
-                            var potentialMatch = string.Concat(partialMatchFromPreviousChunk, chunk.Substring(0, searchTermLength - partialMatchFromPreviousChunk.Length));
+                            // concatenate substring from the end of previous chunk,
+                            // and add substring from the beginning of current chunk
+                            var potentialMatch = string.Concat(partialMatchFromPreviousChunk, currentChunk.Substring(0, searchTermLength - partialMatchFromPreviousChunk.Length));
 
                             // check if it's a match
                             if (string.Compare(searchTerm, potentialMatch, true) == 0)
@@ -63,15 +64,15 @@ namespace MbUtils.TextSearch.Business
                         }
 
                         // some variables to remember
-                        var count = regex.Matches(chunk).Count;
-                        var chunkLength = chunk.Length;
+                        var count = regex.Matches(currentChunk).Count;
+                        var chunkLength = currentChunk.Length;
 
-                        // need to check at the end of the chunk if we can find a next match
+                        // need to check at the end of the chunk if we can find a partial match
                         for (int i = 1; i < searchTermLength; i++)
                         {
-                            // construct substrings
+                            // construct substrings to compare
                             var subSearchTerm = searchTerm.Substring(0, searchTerm.Length - i);
-                            var subChunk = chunk.Substring(chunkLength - subSearchTerm.Length);
+                            var subChunk = currentChunk.Substring(chunkLength - subSearchTerm.Length);
 
                             // check if it's a match
                             if (string.Compare(subSearchTerm, subChunk, true) == 0)

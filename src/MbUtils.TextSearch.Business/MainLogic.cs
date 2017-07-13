@@ -10,18 +10,23 @@ namespace MbUtils.TextSearch.Business
 {
     public class MainLogic
     {
+        // injected services
         readonly ILogger<MainLogic> logger;
         readonly IFilePathProvider filePathProvider;
         readonly IFileInspector fileInspector;
         readonly IResultRepository resultRepo;
-             
+
+        // configuration values
+        readonly int parallelism = 2;
 
         public MainLogic(
             ILoggerFactory loggerFactory, 
             IFilePathProvider filePathProvider, 
             IFileInspector fileInspector,
-            IResultRepository resultRepo)
+            IResultRepository resultRepo,
+            int parallelism)
         {
+            this.parallelism = parallelism;
             logger = loggerFactory.CreateLogger<MainLogic>();
             this.filePathProvider = filePathProvider;
             this.fileInspector = fileInspector;
@@ -36,18 +41,31 @@ namespace MbUtils.TextSearch.Business
             // get file paths (as enumerable)
             var filePaths = filePathProvider.GetFilePaths(inputFolderPath);
 
-            Parallel.ForEach(filePaths, new ParallelOptions() { MaxDegreeOfParallelism = 2 }, (filePath) => {
-                var matchCount = fileInspector.GetNumberOfMatchesAsync(filePath, searchTerm).Result;
-                resultRepo.SaveResult(new SearchResult { FilePath = filePath, MatchCount = matchCount });
+            Parallel.ForEach(filePaths, new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, (filePath) => {
+                try
+                {
+                    // SEARCH
+                    var matchCount = fileInspector.GetNumberOfMatchesAsync(filePath, searchTerm).Result;
+                    resultRepo.SaveResult(new SearchResult { FilePath = filePath, MatchCount = matchCount });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex.Message);
+                }
             });
         }
 
         #region Input validation
         private void ValidateInputFolderPath(string inputFolderPath)
         {
+            // check if it's null
+            if (string.IsNullOrEmpty(inputFolderPath))
+                throw new ArgumentNullException(nameof(inputFolderPath));
+
             var inputFolderInfo = default(DirectoryInfo);
             try
             {
+                // check if path is in valid format
                 inputFolderInfo = new DirectoryInfo(inputFolderPath);
             }
             catch (Exception ex)
@@ -55,6 +73,8 @@ namespace MbUtils.TextSearch.Business
                 logger.LogDebug(ex.Message);
                 throw new ArgumentException($"Invalid input folder path {inputFolderPath}");
             }
+
+            // check if folder exists
             if (!inputFolderInfo.Exists)
                 throw new ArgumentException($"Input folder {inputFolderPath} doesn't exist", nameof(inputFolderPath));
         }

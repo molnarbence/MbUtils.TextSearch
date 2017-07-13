@@ -18,7 +18,7 @@ namespace MbUtils.TextSearch.Business
 
         public IEnumerable<string> GetFilePaths(string rootFolderPath)
         {
-            // try to get enumerator for the folder files
+            // try to enumerate folder files
             var files = default(IEnumerable<string>);
             try
             {
@@ -38,10 +38,11 @@ namespace MbUtils.TextSearch.Business
                 }
             }
 
-            // get enumerator for directories
+            // enumerate folders
             var folders = Directory.EnumerateDirectories(rootFolderPath);
             foreach (var item in folders)
             {
+                // recursive call to enumerate subfolder's files
                 var subFiles = GetFilePaths(item);
                 foreach (var subFile in subFiles)
                 {
