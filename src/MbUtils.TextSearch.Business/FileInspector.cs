@@ -15,6 +15,8 @@ namespace MbUtils.TextSearch.Business
         readonly int bufferSize;
         readonly Encoding encoding;
         readonly ILogger<FileInspector> logger;
+        readonly string searchTerm;
+        readonly ISearchTermCounterStrategy strategy;
         
         long totalReadBytesCount = 0;
 
@@ -24,19 +26,23 @@ namespace MbUtils.TextSearch.Business
         }
         public long TotalReadBytesCount { get { return totalReadBytesCount; } }
 
-        public FileInspector(ILoggerFactory loggerFactory, int bufferSize, bool isUtf8)
+        public FileInspector(ILoggerFactory loggerFactory, int bufferSize, bool isUtf8, string searchTerm, ISearchTermCounterStrategy strategy)
         {
             logger = loggerFactory.CreateLogger<FileInspector>();
+
             this.bufferSize = bufferSize;
             encoding = isUtf8 ? Encoding.UTF8 : Encoding.ASCII;
+
+            this.searchTerm = searchTerm;
+            this.strategy = strategy;
         }
 
-        public async Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm)
+        public async Task<int> GetNumberOfMatchesAsync(string filePath)
         {
             // variables to remember
             var ret = 0;
             var searchTermLength = searchTerm.Length;
-            var regex = new Regex(Regex.Escape(searchTerm));
+            // var regex = new Regex(Regex.Escape(searchTerm));
             var buffer = new char[bufferSize]; // to reuse buffer multiple times
 
             using (var fs = File.OpenRead(filePath))
@@ -63,8 +69,10 @@ namespace MbUtils.TextSearch.Business
                             partialMatchFromPreviousChunk = null;
                         }
 
+                        // count matches
+                        var count = strategy.Count(currentChunk);
+
                         // some variables to remember
-                        var count = regex.Matches(currentChunk).Count;
                         var chunkLength = currentChunk.Length;
 
                         // need to check at the end of the chunk if we can find a partial match

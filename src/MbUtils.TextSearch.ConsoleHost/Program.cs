@@ -30,7 +30,11 @@ namespace MbUtils.TextSearch.ConsoleHost
                 var loggerFactory = new LoggerFactory();
                 loggerFactory.AddConsole(LogLevel.Debug);
                 var filePathProvider = new FilePathProvider(loggerFactory);
-                var fileInspector = new FileInspector(loggerFactory, BUFFERSIZE, true);
+
+                // select strategy
+                var strategy = new RegexStrategy(searchTerm); // new KnuthMorrisPratt(searchTerm);
+
+                var fileInspector = new FileInspector(loggerFactory, BUFFERSIZE, true, searchTerm, strategy);
                 var resultRepo = new FileBasedResultRepository(loggerFactory, outputFilePath);
                 var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector, resultRepo, PARALLELISM);
 
@@ -38,7 +42,7 @@ namespace MbUtils.TextSearch.ConsoleHost
                 var totalMilliseconds = 0L;
                 using (var scope = new WatchScope((ms) => totalMilliseconds = ms))
                 {
-                    mainLogic.Search(inputFolderPath, searchTerm);
+                    mainLogic.Search(inputFolderPath);
                 }
 
                 // write some statistics
@@ -48,6 +52,7 @@ namespace MbUtils.TextSearch.ConsoleHost
                 var readRateInMB = readRate / (1000 * 1000);
                 Console.WriteLine($"               Buffer size: {BUFFERSIZE}");
                 Console.WriteLine($" Max degree of parallelism: {PARALLELISM}");
+                Console.WriteLine($"                  Strategy: {strategy.GetType().Name}");
                 Console.WriteLine($"          Total bytes read: {totalBytesRead} ({totalMBRead:00.00} MB)");
                 Console.WriteLine($"        Total milliseconds: {totalMilliseconds}");
                 Console.WriteLine($"                 Avg. read: {readRate:0.00} bytes/s ({readRateInMB:0.00} MB/s)");

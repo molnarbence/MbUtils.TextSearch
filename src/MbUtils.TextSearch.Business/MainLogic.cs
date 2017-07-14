@@ -33,7 +33,7 @@ namespace MbUtils.TextSearch.Business
             this.resultRepo = resultRepo;
         }
 
-        public void Search(string inputFolderPath, string searchTerm)
+        public void Search(string inputFolderPath)
         {
             // validate input
             ValidateInputFolderPath(inputFolderPath);
@@ -45,7 +45,7 @@ namespace MbUtils.TextSearch.Business
                 try
                 {
                     // SEARCH
-                    var matchCount = fileInspector.GetNumberOfMatchesAsync(filePath, searchTerm).Result;
+                    var matchCount = fileInspector.GetNumberOfMatchesAsync(filePath).Result;
                     resultRepo.SaveResult(new SearchResult { FilePath = filePath, MatchCount = matchCount });
                 }
                 catch (Exception ex)
