@@ -1,6 +1,8 @@
 ﻿using MbUtils.TextSearch.Business;
+using MbUtils.TextSearch.Domain;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace MbUtils.TextSearch.ConsoleHost
@@ -31,14 +33,21 @@ namespace MbUtils.TextSearch.ConsoleHost
                 loggerFactory.AddConsole(LogLevel.Debug);
                 var filePathProvider = new FilePathProvider(loggerFactory);
 
-                // select strategy
-                var strategy = new RegexStrategy(searchTerm); // new KnuthMorrisPratt(searchTerm);
+                // select strategy. I listed several strategies for comparison
+                var strategies = new List<ISearchTermCounterStrategy>()
+                {
+                    new RegexStrategy(searchTerm),
+                    new KnuthMorrisPratt(searchTerm),
+                    new StringSplitStrategy(searchTerm)
+                };
+                var strategy = strategies[0];
 
+                // a bit more setup of services
                 var fileInspector = new FileInspector(loggerFactory, BUFFERSIZE, true, searchTerm, strategy);
                 var resultRepo = new FileBasedResultRepository(loggerFactory, outputFilePath);
                 var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector, resultRepo, PARALLELISM);
 
-                // call the search
+                // call the search, and measure the execution time
                 var totalMilliseconds = 0L;
                 using (var scope = new WatchScope((ms) => totalMilliseconds = ms))
                 {
@@ -55,7 +64,7 @@ namespace MbUtils.TextSearch.ConsoleHost
                 Console.WriteLine($"                  Strategy: {strategy.GetType().Name}");
                 Console.WriteLine($"          Total bytes read: {totalBytesRead} ({totalMBRead:00.00} MB)");
                 Console.WriteLine($"        Total milliseconds: {totalMilliseconds}");
-                Console.WriteLine($"                 Avg. read: {readRate:0.00} bytes/s ({readRateInMB:0.00} MB/s)");
+                Console.WriteLine($"            Avg. exec time: {readRate:0.00} bytes/s ({readRateInMB:0.00} MB/s)");
                 
                 // dispose services
                 resultRepo.Dispose();

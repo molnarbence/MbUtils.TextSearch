@@ -5,6 +5,10 @@ using System.Text;
 
 namespace MbUtils.TextSearch.Business
 {
+    /// <summary>
+    /// String searching, using Knuth-Morris-Pratt algorithm
+    /// https://www.programmingalgorithms.com/algorithm/knuth%E2%80%93morris%E2%80%93pratt-algorithm
+    /// </summary>
     public class KnuthMorrisPratt : ISearchTermCounterStrategy
     {
         readonly int[] lpsArray;
