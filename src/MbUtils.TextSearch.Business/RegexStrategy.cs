@@ -11,7 +11,7 @@ namespace MbUtils.TextSearch.Business
         readonly Regex regex;
         public RegexStrategy(string pattern)
         {
-            regex = new Regex(pattern);
+            regex = new Regex(Regex.Escape(pattern));
         }
 
         public int Count(string input)
