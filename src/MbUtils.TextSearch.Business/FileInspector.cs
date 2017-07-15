@@ -18,8 +18,8 @@ namespace MbUtils.TextSearch.Business
         readonly string searchTerm;
         readonly ISearchTermCounterStrategy strategy;
         
+        // Total read bytes, for statistics
         long totalReadBytesCount = 0;
-
         private void AddReadBytesCount(long count)
         {
             Interlocked.Add(ref totalReadBytesCount, count);

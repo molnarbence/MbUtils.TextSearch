@@ -41,18 +41,25 @@ namespace MbUtils.TextSearch.Business
             // get file paths (as enumerable)
             var filePaths = filePathProvider.GetFilePaths(inputFolderPath);
 
+            // let's enumerate through filepaths using Parallel
             Parallel.ForEach(filePaths, new ParallelOptions() { MaxDegreeOfParallelism = parallelism }, (filePath) => {
-                try
-                {
-                    // SEARCH
-                    var matchCount = fileInspector.GetNumberOfMatchesAsync(filePath).Result;
-                    resultRepo.SaveResult(new SearchResult { FilePath = filePath, MatchCount = matchCount });
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex.Message);
-                }
+                DoSearch(filePath).Wait();
             });
+        }
+
+        private async Task DoSearch(string filePath)
+        {
+            try
+            {
+                // search
+                var matchCount = await fileInspector.GetNumberOfMatchesAsync(filePath);
+                // save the result
+                resultRepo.SaveResult(new SearchResult { FilePath = filePath, MatchCount = matchCount });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
+            }
         }
 
         #region Input validation
