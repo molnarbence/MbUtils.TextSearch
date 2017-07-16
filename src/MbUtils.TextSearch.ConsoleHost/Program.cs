@@ -11,6 +11,7 @@ namespace MbUtils.TextSearch.ConsoleHost
     {
         const int BUFFERSIZE = 1 * 1024 * 1024;
         const int PARALLELISM = 2;
+        const bool IS_PARALLEL = false;
 
         static void Main(string[] args)
         {
@@ -45,7 +46,7 @@ namespace MbUtils.TextSearch.ConsoleHost
                 // a bit more setup of services
                 var fileInspector = new FileInspector(loggerFactory, BUFFERSIZE, true, searchTerm, strategy);
                 var resultRepo = new FileBasedResultRepository(loggerFactory, outputFilePath);
-                var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector, resultRepo, PARALLELISM);
+                var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector, resultRepo, PARALLELISM, IS_PARALLEL);
 
                 // call the search, and measure the execution time
                 var totalMilliseconds = 0L;
@@ -61,6 +62,7 @@ namespace MbUtils.TextSearch.ConsoleHost
                 var readRateInMB = readRate / (1000 * 1000);
                 Console.WriteLine($"               Buffer size: {BUFFERSIZE}");
                 Console.WriteLine($" Max degree of parallelism: {PARALLELISM}");
+                Console.WriteLine($"               Is parallel: {IS_PARALLEL}");
                 Console.WriteLine($"                  Strategy: {strategy.GetType().Name}");
                 Console.WriteLine($"          Total bytes read: {totalBytesRead} ({totalMBRead:00.00} MB)");
                 Console.WriteLine($"        Total milliseconds: {totalMilliseconds}");

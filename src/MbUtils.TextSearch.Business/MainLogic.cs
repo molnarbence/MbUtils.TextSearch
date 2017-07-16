@@ -16,7 +16,7 @@ namespace MbUtils.TextSearch.Business
         readonly IFileInspector fileInspector;
         readonly IResultRepository resultRepo;
 
-        readonly bool isParallel = false;
+        readonly bool isParallel;
 
         // configuration values
         readonly int parallelism = 2;
@@ -26,9 +26,11 @@ namespace MbUtils.TextSearch.Business
             IFilePathProvider filePathProvider, 
             IFileInspector fileInspector,
             IResultRepository resultRepo,
-            int parallelism)
+            int parallelism,
+            bool isParallel)
         {
             this.parallelism = parallelism;
+            this.isParallel = isParallel;
             logger = loggerFactory.CreateLogger<MainLogic>();
             this.filePathProvider = filePathProvider;
             this.fileInspector = fileInspector;
@@ -49,7 +51,8 @@ namespace MbUtils.TextSearch.Business
                     DoSearch(filePath).Wait();
                 });
             }
-            else {
+            else
+            {
                 var taskList = new List<Task>();
                 foreach (var item in filePaths)
                 {
