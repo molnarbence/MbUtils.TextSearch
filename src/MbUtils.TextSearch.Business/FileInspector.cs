@@ -76,18 +76,21 @@ namespace MbUtils.TextSearch.Business
                         var chunkLength = currentChunk.Length;
 
                         // need to check at the end of the chunk if we can find a partial match
-                        for (int i = 1; i < searchTermLength; i++)
+                        if(chunkLength > (searchTermLength - 1))
                         {
-                            // construct substrings to compare
-                            var subSearchTerm = searchTerm.Substring(0, searchTerm.Length - i);
-                            var subChunk = currentChunk.Substring(chunkLength - subSearchTerm.Length);
-
-                            // check if it's a match
-                            if (string.Compare(subSearchTerm, subChunk, true) == 0)
+                            for (int i = 1; i < searchTermLength; i++)
                             {
-                                // found a match
-                                partialMatchFromPreviousChunk = subChunk;
-                                break;
+                                // construct substrings to compare
+                                var subSearchTerm = searchTerm.Substring(0, searchTerm.Length - i);
+                                var subChunk = currentChunk.Substring(chunkLength - subSearchTerm.Length);
+
+                                // check if it's a match
+                                if (string.Compare(subSearchTerm, subChunk, true) == 0)
+                                {
+                                    // found a match
+                                    partialMatchFromPreviousChunk = subChunk;
+                                    break;
+                                }
                             }
                         }
 

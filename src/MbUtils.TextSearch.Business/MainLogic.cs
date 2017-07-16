@@ -16,6 +16,8 @@ namespace MbUtils.TextSearch.Business
         readonly IFileInspector fileInspector;
         readonly IResultRepository resultRepo;
 
+        readonly bool isParallel = false;
+
         // configuration values
         readonly int parallelism = 2;
 
@@ -41,14 +43,21 @@ namespace MbUtils.TextSearch.Business
             // get file paths (as enumerable)
             var filePaths = filePathProvider.GetFilePaths(inputFolderPath);
 
-
-            var taskList = new List<Task>();
-            foreach (var item in filePaths)
+            if (isParallel)
             {
-                taskList.Add(DoSearch(item));
+                Parallel.ForEach(filePaths, new ParallelOptions { MaxDegreeOfParallelism = parallelism }, (filePath) => {
+                    DoSearch(filePath).Wait();
+                });
             }
+            else {
+                var taskList = new List<Task>();
+                foreach (var item in filePaths)
+                {
+                    taskList.Add(DoSearch(item));
+                }
 
-            Task.WhenAll(taskList).Wait();
+                Task.WhenAll(taskList).Wait();
+            }
 
         }
 

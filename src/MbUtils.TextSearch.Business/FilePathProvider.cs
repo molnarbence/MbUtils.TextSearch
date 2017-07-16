@@ -38,15 +38,28 @@ namespace MbUtils.TextSearch.Business
                 }
             }
 
-            // enumerate folders
-            var folders = Directory.EnumerateDirectories(rootFolderPath);
-            foreach (var item in folders)
+            // try enumerate folders
+            var folders = default(IEnumerable<string>);
+            try
             {
-                // recursive call to enumerate subfolder's files
-                var subFiles = GetFilePaths(item);
-                foreach (var subFile in subFiles)
+                folders = Directory.EnumerateDirectories(rootFolderPath);
+                
+            }
+            catch (Exception ex)
+            {
+                logger.LogDebug($"{rootFolderPath}: Can't enumerate directories. {ex.Message}");
+            }
+                
+            if(folders != null)
+            {
+                foreach (var item in folders)
                 {
-                    yield return subFile;
+                    // recursive call to enumerate subfolder's files
+                    var subFiles = GetFilePaths(item);
+                    foreach (var subFile in subFiles)
+                    {
+                        yield return subFile;
+                    }
                 }
             }
         }
