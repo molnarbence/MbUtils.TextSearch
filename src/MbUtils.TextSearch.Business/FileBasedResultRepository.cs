@@ -1,5 +1,4 @@
-﻿using MbUtils.TextSearch.Domain;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

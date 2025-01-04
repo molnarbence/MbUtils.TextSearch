@@ -5,12 +5,10 @@
     <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MbUtils.TextSearch.Domain\MbUtils.TextSearch.Domain.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>

@@ -1,9 +1,5 @@
 ﻿using MbUtils.TextSearch.Business;
-using MbUtils.TextSearch.Domain;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace MbUtils.TextSearch.ConsoleHost
 {
@@ -12,6 +8,7 @@ namespace MbUtils.TextSearch.ConsoleHost
         const int BUFFERSIZE = 1 * 1024 * 1024;
         const int PARALLELISM = 2;
         const bool IS_PARALLEL = false;
+        const int STRATEGY = 1;
 
         static void Main(string[] args)
         {
@@ -41,7 +38,7 @@ namespace MbUtils.TextSearch.ConsoleHost
                     new KnuthMorrisPratt(searchTerm),
                     new StringSplitStrategy(searchTerm)
                 };
-                var strategy = strategies[0];
+                var strategy = strategies[STRATEGY];
 
                 // a bit more setup of services
                 var fileInspector = new FileInspector(loggerFactory, BUFFERSIZE, true, searchTerm, strategy);
