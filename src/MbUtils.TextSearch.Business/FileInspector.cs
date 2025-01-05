@@ -41,7 +41,6 @@ namespace MbUtils.TextSearch.Business
             // variables to remember
             var ret = 0;
             var searchTermLength = searchTerm.Length;
-            // var regex = new Regex(Regex.Escape(searchTerm));
             var buffer = new char[bufferSize]; // to reuse buffer multiple times
 
             using (var fs = File.OpenRead(filePath))
