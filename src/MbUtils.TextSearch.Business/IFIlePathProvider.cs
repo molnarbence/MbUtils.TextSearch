@@ -1,7 +1,6 @@
-﻿namespace MbUtils.TextSearch.Business
+﻿namespace MbUtils.TextSearch.Business;
+
+public interface IFilePathProvider
 {
-    public interface IFilePathProvider
-    {
-        IEnumerable<string> GetFilePaths(string rootFolderPath);
-    }
+    IEnumerable<string> GetFilePaths(string rootFolderPath);
 }

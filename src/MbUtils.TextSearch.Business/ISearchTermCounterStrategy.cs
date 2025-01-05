@@ -1,7 +1,6 @@
-﻿namespace MbUtils.TextSearch.Business
+﻿namespace MbUtils.TextSearch.Business;
+
+public interface ISearchTermCounterStrategy
 {
-    public interface ISearchTermCounterStrategy
-    {
-        int Count(string input);
-    }
+    int Count(string input);
 }

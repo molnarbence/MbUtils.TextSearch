@@ -1,7 +1,6 @@
-﻿namespace MbUtils.TextSearch.Business
+﻿namespace MbUtils.TextSearch.Business;
+
+public interface IFileInspector
 {
-    public interface IFileInspector
-    {
-        Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm);
-    }
+    Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm);
 }

@@ -1,7 +1,6 @@
-﻿namespace MbUtils.TextSearch.Business
+﻿namespace MbUtils.TextSearch.Business;
+
+public interface IResultRepository
 {
-    public interface IResultRepository
-    {
-        void SaveResult(SearchResult result);
-    }
+    void SaveResult(SearchResult result);
 }
