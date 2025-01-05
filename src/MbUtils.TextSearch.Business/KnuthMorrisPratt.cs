@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MbUtils.TextSearch.Business
+﻿namespace MbUtils.TextSearch.Business
 {
     /// <summary>
     /// String searching, using Knuth-Morris-Pratt algorithm

@@ -1,11 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MbUtils.TextSearch.Business
 {
@@ -15,7 +9,6 @@ namespace MbUtils.TextSearch.Business
         readonly ConcurrentQueue<SearchResult> queue;
         readonly AutoResetEvent waitHandle;
         readonly ILogger<FileBasedResultRepository> logger;
-        readonly Task saveTask;
         readonly CancellationTokenSource tokenSource;
         readonly CancellationToken token;
 
@@ -44,7 +37,7 @@ namespace MbUtils.TextSearch.Business
 
             tokenSource = new CancellationTokenSource();
             token = tokenSource.Token;
-            saveTask = Task.Run(() => SaveTask(), token);
+            Task.Run(() => SaveTask(), token);
         }
 
         /// <summary>

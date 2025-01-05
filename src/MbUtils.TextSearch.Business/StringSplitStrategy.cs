@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MbUtils.TextSearch.Business
+﻿namespace MbUtils.TextSearch.Business
 {
     public class StringSplitStrategy : ISearchTermCounterStrategy
     {
