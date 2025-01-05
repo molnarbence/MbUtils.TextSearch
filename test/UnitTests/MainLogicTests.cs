@@ -53,8 +53,8 @@ public class MainLogicTests
         
         // assert
         _resultRepo.Received(2).SaveResult(Arg.Any<SearchResult>());
-        _resultRepo.Received(1).SaveResult(Arg.Is<SearchResult>(s => s.MatchCount == 6 && s.FilePath.EndsWith("file1.txt")));
-        _resultRepo.Received(1).SaveResult(Arg.Is<SearchResult>(s => s.MatchCount == 11 && s.FilePath.EndsWith("file2.txt")));
+        _resultRepo.Received().SaveResult(new SearchResult(Path.Combine(InputFolderPath, "file1.txt"), 6));
+        _resultRepo.Received().SaveResult(new SearchResult(Path.Combine(InputFolderPath, "file2.txt"), 11));
     }
     
     private MainLogic CreateMainLogic(int strategyIndex, int bufferSize)

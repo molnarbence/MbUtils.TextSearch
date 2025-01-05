@@ -65,11 +65,11 @@ namespace MbUtils.TextSearch.Business
                 // search
                 var matchCount = await fileInspector.GetNumberOfMatchesAsync(filePath, searchTerm);
                 // save the result
-                resultRepo.SaveResult(new SearchResult { FilePath = filePath, MatchCount = matchCount });
+                resultRepo.SaveResult(new SearchResult(filePath, matchCount));
             }
             catch (Exception ex)
             {
-                logger.LogError(ex.Message);
+                logger.LogError("Could not perform search, {ExceptionMessage}", ex.Message);
             }
         }
 
