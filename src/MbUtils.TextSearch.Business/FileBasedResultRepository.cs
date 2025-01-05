@@ -1,115 +1,111 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
-namespace MbUtils.TextSearch.Business
+namespace MbUtils.TextSearch.Business;
+
+public sealed class FileBasedResultRepository : IResultRepository, IDisposable
 {
-    public class FileBasedResultRepository : IResultRepository, IDisposable
+    private readonly string _outputFilePath;
+    private readonly ConcurrentQueue<SearchResult> _queue;
+    private readonly AutoResetEvent _waitHandle;
+    private readonly ILogger<FileBasedResultRepository> _logger;
+    private readonly CancellationTokenSource _tokenSource;
+    private readonly CancellationToken _token;
+
+    public FileBasedResultRepository(ILoggerFactory loggerFactory, string outputFilePath)
     {
-        readonly string outputFilePath;
-        readonly ConcurrentQueue<SearchResult> queue;
-        readonly AutoResetEvent waitHandle;
-        readonly ILogger<FileBasedResultRepository> logger;
-        readonly CancellationTokenSource tokenSource;
-        readonly CancellationToken token;
-
-        public FileBasedResultRepository(ILoggerFactory loggerFactory, string outputFilePath)
+        // validate output file and folder
+        try
         {
-            // validate output file and folder
-            try
+            var fileInfo = new FileInfo(outputFilePath);
+            if (!fileInfo.Directory?.Exists ?? true)
+                fileInfo.Directory?.Create();
+            if (fileInfo.Exists)
+                fileInfo.Delete();
+            File.WriteAllText(outputFilePath, $"Path,Match count{Environment.NewLine}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug("Output file cannot be written, {ExceptionMessage}", ex.Message);
+            throw new ArgumentException("Output file cannot be written");
+        }
+
+        _logger = loggerFactory.CreateLogger<FileBasedResultRepository>();
+        _waitHandle = new AutoResetEvent(false);
+        _outputFilePath = outputFilePath;
+        _queue = new ConcurrentQueue<SearchResult>();
+
+        _tokenSource = new CancellationTokenSource();
+        _token = _tokenSource.Token;
+        Task.Run(SaveTask, _token);
+    }
+
+    /// <summary>
+    /// Queue the result, so the background thread can write it to file
+    /// </summary>
+    /// <param name="result"></param>
+    public void SaveResult(SearchResult result)
+    {
+        _queue.Enqueue(result);
+        _waitHandle.Set();
+    }
+
+    /// <summary>
+    /// Actually doing the saving the content to file, on a background thread
+    /// </summary>
+    private void SaveTask()
+    {
+        while(!_token.IsCancellationRequested)
+        {
+            // wait for the next signal
+            _waitHandle.WaitOne();
+
+            // dequeue one item
+            while (_queue.TryDequeue(out var result))
             {
-                var fileInfo = new FileInfo(outputFilePath);
-                if (!fileInfo.Directory.Exists)
-                    fileInfo.Directory.Create();
-                if (fileInfo.Exists)
-                    fileInfo.Delete();
-                File.WriteAllText(outputFilePath, $"Path,Match count{Environment.NewLine}");
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug(ex.Message);
-                throw new ArgumentException("Output file cannot be written");
-            }
-
-            logger = loggerFactory.CreateLogger<FileBasedResultRepository>();
-            waitHandle = new AutoResetEvent(false);
-            this.outputFilePath = outputFilePath;
-            queue = new ConcurrentQueue<SearchResult>();
-
-            tokenSource = new CancellationTokenSource();
-            token = tokenSource.Token;
-            Task.Run(() => SaveTask(), token);
-        }
-
-        /// <summary>
-        /// Queue the result, so the background thread can write it to file
-        /// </summary>
-        /// <param name="result"></param>
-        public void SaveResult(SearchResult result)
-        {
-            queue.Enqueue(result);
-            waitHandle.Set();
-        }
-
-        /// <summary>
-        /// Actually doing the saving the content to file, on a background thread
-        /// </summary>
-        private void SaveTask()
-        {
-            while(!token.IsCancellationRequested)
-            {
-                // wait for the next signal
-                waitHandle.WaitOne();
-
-                // dequeue one item
-                SearchResult result;
-                while (queue.TryDequeue(out result))
-                {
-                    if (result == null)
-                        continue;
-
-                    try
-                    {
-                        // save to file
-                        DoSave(result);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogDebug(ex.Message);
-                    }
-                }
-            }
-            
-        }
-
-        private void DoSave(SearchResult result)
-        {
-            File.AppendAllText(outputFilePath, $"\"{result.FilePath}\",{result.MatchCount}{Environment.NewLine}");
-        }
-
-        #region IDisposable Support
-        private bool disposedValue = false;
-        
-        public void Dispose()
-        {
-            if (!disposedValue)
-            {   
-                // dequeue all remaining
-                SearchResult dummy;
-                while (queue.TryDequeue(out dummy))
-                {
-                }
-
-                // cancel file writer thread
                 try
                 {
-                    tokenSource.Cancel();
+                    // save to file
+                    DoSave(result);
                 }
-                catch { }
-
-                // set to disposed
-                disposedValue = true;
+                catch (Exception ex)
+                {
+                    _logger.LogDebug("Could not save file. {ExceptionMessage}", ex.Message);
+                }
             }
         }
-        #endregion
+            
     }
+
+    private void DoSave(SearchResult result)
+    {
+        File.AppendAllText(_outputFilePath, $"\"{result.FilePath}\",{result.MatchCount}{Environment.NewLine}");
+    }
+
+    #region IDisposable Support
+    private bool _disposedValue;
+        
+    public void Dispose()
+    {
+        if (_disposedValue) return;
+        
+        // dequeue all remaining
+        while (_queue.TryDequeue(out var dummy))
+        {
+        }
+
+        // cancel file writer thread
+        try
+        {
+            _tokenSource.Cancel();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        // set to disposed
+        _disposedValue = true;
+    }
+    #endregion
 }
