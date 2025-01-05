@@ -53,11 +53,11 @@ public class FileInspector(int bufferSize, bool isUtf8, ISearchTermCounterStrate
             // need to check at the end of the chunk if we can find a partial match
             if(chunkLength > (searchTermLength - 1))
             {
-                for (int i = 1; i < searchTermLength; i++)
+                for (var i = 1; i < searchTermLength; i++)
                 {
                     // construct substrings to compare
-                    var subSearchTerm = searchTerm.Substring(0, searchTerm.Length - i);
-                    var subChunk = currentChunk.Substring(chunkLength - subSearchTerm.Length);
+                    var subSearchTerm = searchTerm[..^i];
+                    var subChunk = currentChunk[(chunkLength - subSearchTerm.Length)..];
 
                     // check if it's a match
                     if (string.Compare(subSearchTerm, subChunk, StringComparison.OrdinalIgnoreCase) != 0) continue;
