@@ -1,24 +1,17 @@
 ﻿using System.Diagnostics;
 
-namespace MbUtils.TextSearch.Business
-{
-    /// <summary>
-    /// A helper class to measure execution time
-    /// </summary>
-    public class WatchScope : IDisposable
-    {
-        readonly Action<long> callback;
-        readonly Stopwatch sw;
-        public WatchScope(Action<long> callback)
-        {
-            this.callback = callback;
-            sw = Stopwatch.StartNew();
-        }
+namespace MbUtils.TextSearch.Business;
 
-        public void Dispose()
-        {
-            sw.Stop();
-            callback(sw.ElapsedMilliseconds);
-        }
+/// <summary>
+/// A helper class to measure execution time
+/// </summary>
+public sealed class WatchScope(Action<long> callback) : IDisposable
+{
+    private readonly Stopwatch _sw = Stopwatch.StartNew();
+
+    public void Dispose()
+    {
+        _sw.Stop();
+        callback(_sw.ElapsedMilliseconds);
     }
 }

@@ -1,17 +1,6 @@
-﻿namespace MbUtils.TextSearch.Business
+﻿namespace MbUtils.TextSearch.Business;
+
+public class StringSplitStrategy(string pattern) : ISearchTermCounterStrategy
 {
-    public class StringSplitStrategy : ISearchTermCounterStrategy
-    {
-        readonly string pattern;
-
-        public StringSplitStrategy(string pattern)
-        {
-            this.pattern = pattern;
-        }
-
-        public int Count(string input)
-        {
-            return input.Split(new[] { pattern }, StringSplitOptions.None).Length - 1;
-        }
-    }
+    public int Count(string input) => input.Split([pattern], StringSplitOptions.None).Length - 1;
 }
