@@ -1,61 +1,48 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace MbUtils.TextSearch.Business
-{
-    public class FilePathProvider : IFilePathProvider
-    {
-        readonly ILogger<FilePathProvider> logger;
+namespace MbUtils.TextSearch.Business;
 
-        public FilePathProvider(ILoggerFactory loggerFactory)
+public class FilePathProvider(ILoggerFactory loggerFactory) : IFilePathProvider
+{
+    private readonly ILogger<FilePathProvider> _logger = loggerFactory.CreateLogger<FilePathProvider>();
+
+    public IEnumerable<string> GetFilePaths(string rootFolderPath)
+    {
+        // try to enumerate folder files
+        IEnumerable<string> files = [];
+        try
         {
-            logger = loggerFactory.CreateLogger<FilePathProvider>();
+            files = Directory.EnumerateFiles(rootFolderPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug("{RootFolderPath}: {Message}", rootFolderPath, ex.Message);
         }
 
-        public IEnumerable<string> GetFilePaths(string rootFolderPath)
+        // return files if any
+        foreach (var item in files)
         {
-            // try to enumerate folder files
-            var files = default(IEnumerable<string>);
-            try
-            {
-                files = Directory.EnumerateFiles(rootFolderPath);
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug($"{rootFolderPath}: {ex.Message}");
-            }
+            yield return item;
+        }
 
-            // return files if any
-            if (files != null)
-            {
-                foreach (var item in files)
-                {
-                    yield return item;
-                }
-            }
+        // try enumerate folders
+        IEnumerable<string> folders = [];
+        try
+        {
+            folders = Directory.EnumerateDirectories(rootFolderPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug("{RootFolderPath}: Can't enumerate directories. {ExceptionMessage}", rootFolderPath, ex.Message);
+        }
 
-            // try enumerate folders
-            var folders = default(IEnumerable<string>);
-            try
+        foreach (var item in folders)
+        {
+            // recursive call to enumerate subfolder's files
+            var subFiles = GetFilePaths(item);
+            foreach (var subFile in subFiles)
             {
-                folders = Directory.EnumerateDirectories(rootFolderPath);
-                
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug($"{rootFolderPath}: Can't enumerate directories. {ex.Message}");
-            }
-                
-            if(folders != null)
-            {
-                foreach (var item in folders)
-                {
-                    // recursive call to enumerate subfolder's files
-                    var subFiles = GetFilePaths(item);
-                    foreach (var subFile in subFiles)
-                    {
-                        yield return subFile;
-                    }
-                }
+                yield return subFile;
             }
         }
     }
