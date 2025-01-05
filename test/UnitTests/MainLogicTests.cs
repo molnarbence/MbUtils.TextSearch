@@ -31,7 +31,7 @@ public class MainLogicTests
         var unitUnderTest = CreateMainLogic(strategyIndex, bufferSize);
         
         // act
-        unitUnderTest.Search(InputFolderPath);
+        unitUnderTest.Search(InputFolderPath, SearchTerm);
 
         // assert
         _resultRepo.Received(2).SaveResult(Arg.Any<SearchResult>());
@@ -49,7 +49,7 @@ public class MainLogicTests
         var unitUnderTest = CreateMainLogic(strategyIndex, bufferSize);
         
         // act
-        unitUnderTest.Search(InputFolderPath);
+        unitUnderTest.Search(InputFolderPath, SearchTerm);
         
         // assert
         _resultRepo.Received(2).SaveResult(Arg.Any<SearchResult>());
@@ -62,7 +62,7 @@ public class MainLogicTests
         var loggerFactory = new LoggerFactory();
         var filePathProvider = new FilePathProvider(loggerFactory);
         var strategy = _strategies[strategyIndex];
-        var fileInspector = new FileInspector(loggerFactory, bufferSize, true, SearchTerm, strategy);
+        var fileInspector = new FileInspector(bufferSize, true, strategy);
         return new MainLogic(loggerFactory, filePathProvider, fileInspector, _resultRepo, Parallelism, IsParallel);
     }
 }

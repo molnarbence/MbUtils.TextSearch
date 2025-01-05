@@ -41,7 +41,7 @@ namespace MbUtils.TextSearch.ConsoleHost
                 var strategy = strategies[STRATEGY];
 
                 // a bit more setup of services
-                var fileInspector = new FileInspector(loggerFactory, BUFFERSIZE, true, searchTerm, strategy);
+                var fileInspector = new FileInspector(BUFFERSIZE, true, strategy);
                 var resultRepo = new FileBasedResultRepository(loggerFactory, outputFilePath);
                 var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector, resultRepo, PARALLELISM, IS_PARALLEL);
 
@@ -49,7 +49,7 @@ namespace MbUtils.TextSearch.ConsoleHost
                 var totalMilliseconds = 0L;
                 using (var scope = new WatchScope((ms) => totalMilliseconds = ms))
                 {
-                    mainLogic.Search(inputFolderPath);
+                    mainLogic.Search(inputFolderPath, searchTerm);
                 }
 
                 // write some statistics

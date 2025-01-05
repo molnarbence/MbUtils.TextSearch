@@ -2,6 +2,6 @@
 {
     public interface IFileInspector
     {
-        Task<int> GetNumberOfMatchesAsync(string filePath);
+        Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm);
     }
 }

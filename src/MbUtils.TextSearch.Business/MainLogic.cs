@@ -31,7 +31,7 @@ namespace MbUtils.TextSearch.Business
             this.resultRepo = resultRepo;
         }
 
-        public void Search(string inputFolderPath)
+        public void Search(string inputFolderPath, string searchTerm)
         {
             // validate input
             ValidateInputFolderPath(inputFolderPath);
@@ -42,7 +42,7 @@ namespace MbUtils.TextSearch.Business
             if (isParallel)
             {
                 Parallel.ForEach(filePaths, new ParallelOptions { MaxDegreeOfParallelism = parallelism }, (filePath) => {
-                    DoSearch(filePath).Wait();
+                    DoSearch(filePath, searchTerm).Wait();
                 });
             }
             else
@@ -50,7 +50,7 @@ namespace MbUtils.TextSearch.Business
                 var taskList = new List<Task>();
                 foreach (var item in filePaths)
                 {
-                    taskList.Add(DoSearch(item));
+                    taskList.Add(DoSearch(item, searchTerm));
                 }
 
                 Task.WhenAll(taskList).Wait();
@@ -58,12 +58,12 @@ namespace MbUtils.TextSearch.Business
 
         }
 
-        private async Task DoSearch(string filePath)
+        private async Task DoSearch(string filePath, string searchTerm)
         {   
             try
             {
                 // search
-                var matchCount = await fileInspector.GetNumberOfMatchesAsync(filePath);
+                var matchCount = await fileInspector.GetNumberOfMatchesAsync(filePath, searchTerm);
                 // save the result
                 resultRepo.SaveResult(new SearchResult { FilePath = filePath, MatchCount = matchCount });
             }
