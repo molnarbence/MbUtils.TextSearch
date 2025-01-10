@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace MbUtils.TextSearch.Business;
 
@@ -7,8 +8,7 @@ public class MainLogic(
     IFilePathProvider filePathProvider,
     IFileInspector fileInspector,
     IResultRepository resultRepo,
-    int parallelism,
-    bool isParallel)
+    IOptions<MainLogicConfiguration> config)
 {
     // injected services
     private readonly ILogger<MainLogic> _logger = loggerFactory.CreateLogger<MainLogic>();
@@ -23,19 +23,15 @@ public class MainLogic(
         // get file paths (as enumerable)
         var filePaths = filePathProvider.GetFilePaths(inputFolderPath);
 
-        if (isParallel)
+        if (config.Value.ParallelTasks > 1)
         {
-            Parallel.ForEach(filePaths, new ParallelOptions { MaxDegreeOfParallelism = parallelism }, (filePath) => {
+            Parallel.ForEach(filePaths, new ParallelOptions { MaxDegreeOfParallelism = config.Value.ParallelTasks }, (filePath) => {
                 DoSearch(filePath, searchTerm).Wait();
             });
         }
         else
         {
-            var taskList = new List<Task>();
-            foreach (var item in filePaths)
-            {
-                taskList.Add(DoSearch(item, searchTerm));
-            }
+            var taskList = filePaths.Select(item => DoSearch(item, searchTerm)).ToList();
 
             Task.WhenAll(taskList).Wait();
         }
@@ -81,4 +77,9 @@ public class MainLogic(
             throw new ArgumentException($"Input folder {inputFolderPath} doesn't exist", nameof(inputFolderPath));
     }
     #endregion
+}
+
+public class MainLogicConfiguration
+{
+    public int ParallelTasks { get; set; } = 1;
 }

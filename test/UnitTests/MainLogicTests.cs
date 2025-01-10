@@ -1,5 +1,6 @@
 ﻿using MbUtils.TextSearch.Business;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace UnitTests;
@@ -7,7 +8,6 @@ namespace UnitTests;
 public class MainLogicTests
 {
     private const int Parallelism = 2;
-    private const bool IsParallel = false;
     private const string InputFolderPath = "inputfolder";
     private const string SearchTerm = "target";
     
@@ -62,7 +62,18 @@ public class MainLogicTests
         var loggerFactory = new LoggerFactory();
         var filePathProvider = new FilePathProvider(loggerFactory);
         var strategy = _strategies[strategyIndex];
-        var fileInspector = new FileInspector(bufferSize, true, strategy);
-        return new MainLogic(loggerFactory, filePathProvider, fileInspector, _resultRepo, Parallelism, IsParallel);
+
+        var fileInspectorOptions = Options.Create(new FileInspectorConfiguration
+        {
+            IsUtf8 = true,
+            BufferSize = bufferSize
+        });
+        var fileInspector = new FileInspector(fileInspectorOptions, strategy);
+        
+        var mainLogicOptions = Options.Create(new MainLogicConfiguration
+        {
+            ParallelTasks = Parallelism
+        });
+        return new MainLogic(loggerFactory, filePathProvider, fileInspector, _resultRepo, mainLogicOptions);
     }
 }

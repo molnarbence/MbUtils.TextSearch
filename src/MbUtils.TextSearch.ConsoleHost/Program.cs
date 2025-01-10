@@ -1,5 +1,6 @@
 ﻿using MbUtils.TextSearch.Business;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace MbUtils.TextSearch.ConsoleHost;
 
@@ -7,7 +8,6 @@ class Program
 {
     const int BUFFERSIZE = 1 * 1024 * 1024;
     const int PARALLELISM = 2;
-    const bool IS_PARALLEL = false;
     const int STRATEGY = 1;
 
     static void Main(string[] args)
@@ -41,9 +41,24 @@ class Program
             var strategy = strategies[STRATEGY];
 
             // a bit more setup of services
-            var fileInspector = new FileInspector(BUFFERSIZE, true, strategy);
-            var resultRepo = new FileBasedResultRepository(loggerFactory, outputFilePath);
-            var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector, resultRepo, PARALLELISM, IS_PARALLEL);
+            var fileInspectorOptions = Options.Create(new FileInspectorConfiguration
+            {
+                IsUtf8 = true,
+                BufferSize = BUFFERSIZE
+            });
+            var fileInspector = new FileInspector(fileInspectorOptions, strategy);
+
+            var resultRepoOptions = Options.Create(new FileBasedResultRepositoryConfiguration
+            {
+                OutputFilePath = outputFilePath
+            });
+            var resultRepo = new FileBasedResultRepository(loggerFactory, resultRepoOptions);
+
+            var mainLogicOptions = Options.Create(new MainLogicConfiguration
+            {
+                ParallelTasks = PARALLELISM
+            });
+            var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector, resultRepo, mainLogicOptions);
 
             // call the search, and measure the execution time
             var totalMilliseconds = 0L;
@@ -59,7 +74,6 @@ class Program
             var readRateInMb = readRate / (1000 * 1000);
             Console.WriteLine($"               Buffer size: {BUFFERSIZE}");
             Console.WriteLine($" Max degree of parallelism: {PARALLELISM}");
-            Console.WriteLine($"               Is parallel: {IS_PARALLEL}");
             Console.WriteLine($"                  Strategy: {strategy.GetType().Name}");
             Console.WriteLine($"          Total bytes read: {totalBytesRead} ({totalMbRead:00.00} MB)");
             Console.WriteLine($"        Total milliseconds: {totalMilliseconds}");
