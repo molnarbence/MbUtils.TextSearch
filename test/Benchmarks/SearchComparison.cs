@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using MbUtils.TextSearch.Business;
+using MbUtils.TextSearch.Business.Strategies;
 
 namespace Benchmarks;
 

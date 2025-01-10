@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace MbUtils.TextSearch.Business;
+namespace MbUtils.TextSearch.Business.Strategies;
 
 public class RegexStrategy(string pattern) : ISearchTermCounterStrategy
 {

@@ -1,4 +1,4 @@
-﻿namespace MbUtils.TextSearch.Business;
+﻿namespace MbUtils.TextSearch.Business.Strategies;
 
 /// <summary>
 /// String searching, using Knuth-Morris-Pratt algorithm

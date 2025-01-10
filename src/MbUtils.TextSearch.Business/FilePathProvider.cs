@@ -2,10 +2,9 @@
 
 namespace MbUtils.TextSearch.Business;
 
-public class FilePathProvider(ILoggerFactory loggerFactory) : IFilePathProvider
+[RegisterSingleton]
+public class FilePathProvider(ILogger<FilePathProvider> logger) : IFilePathProvider
 {
-    private readonly ILogger<FilePathProvider> _logger = loggerFactory.CreateLogger<FilePathProvider>();
-
     public IEnumerable<string> GetFilePaths(string rootFolderPath)
     {
         // try to enumerate folder files
@@ -16,7 +15,7 @@ public class FilePathProvider(ILoggerFactory loggerFactory) : IFilePathProvider
         }
         catch (Exception ex)
         {
-            _logger.LogDebug("{RootFolderPath}: {Message}", rootFolderPath, ex.Message);
+            logger.LogDebug("{RootFolderPath}: {Message}", rootFolderPath, ex.Message);
         }
 
         // return files if any
@@ -33,7 +32,7 @@ public class FilePathProvider(ILoggerFactory loggerFactory) : IFilePathProvider
         }
         catch (Exception ex)
         {
-            _logger.LogDebug("{RootFolderPath}: Can't enumerate directories. {ExceptionMessage}", rootFolderPath, ex.Message);
+            logger.LogDebug("{RootFolderPath}: Can't enumerate directories. {ExceptionMessage}", rootFolderPath, ex.Message);
         }
 
         foreach (var item in folders)

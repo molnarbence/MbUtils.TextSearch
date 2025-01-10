@@ -3,7 +3,8 @@ using Microsoft.Extensions.Options;
 
 namespace MbUtils.TextSearch.Business;
 
-public class FileInspector(IOptions<FileInspectorConfiguration> config, ISearchTermCounterStrategy strategy)
+[RegisterSingleton]
+public class FileInspector(IOptions<AppConfig> config, ISearchTermCounterStrategyFactory strategyFactory)
     : IFileInspector
 {
     private readonly Encoding _encoding = config.Value.IsUtf8 ? Encoding.UTF8 : Encoding.ASCII;
@@ -22,6 +23,7 @@ public class FileInspector(IOptions<FileInspectorConfiguration> config, ISearchT
         var ret = 0;
         var searchTermLength = searchTerm.Length;
         var buffer = new char[config.Value.BufferSize]; // to reuse buffer multiple times
+        var strategy = strategyFactory.Create(searchTerm);
 
         await using var fs = File.OpenRead(filePath);
         using var sr = new StreamReader(fs, _encoding, true);
@@ -86,10 +88,4 @@ public class FileInspector(IOptions<FileInspectorConfiguration> config, ISearchT
             ? new string(buffer, 0, readBytesCount) 
             : null;
     }
-}
-
-public class FileInspectorConfiguration
-{
-    public bool IsUtf8 { get; init; } = true;
-    public int BufferSize { get; set; }
 }

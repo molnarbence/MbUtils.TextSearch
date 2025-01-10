@@ -4,19 +4,21 @@ using Microsoft.Extensions.Options;
 
 namespace MbUtils.TextSearch.Business;
 
+[RegisterSingleton]
 public sealed class FileBasedResultRepository : IResultRepository, IDisposable
 {
-    private readonly IOptions<FileBasedResultRepositoryConfiguration> _config;
+    private readonly IOptions<AppConfig> _config;
     private readonly ConcurrentQueue<SearchResult> _queue;
     private readonly AutoResetEvent _waitHandle;
     private readonly ILogger<FileBasedResultRepository> _logger;
     private readonly CancellationTokenSource _tokenSource;
     private readonly CancellationToken _token;
 
-    public FileBasedResultRepository(ILoggerFactory loggerFactory, 
-        IOptions<FileBasedResultRepositoryConfiguration> config)
+    public FileBasedResultRepository(ILogger<FileBasedResultRepository> logger, 
+        IOptions<AppConfig> config)
     {
         _config = config;
+        _logger = logger;
         // validate output file and folder
         try
         {
@@ -33,7 +35,6 @@ public sealed class FileBasedResultRepository : IResultRepository, IDisposable
             throw new ArgumentException("Output file cannot be written");
         }
 
-        _logger = loggerFactory.CreateLogger<FileBasedResultRepository>();
         _waitHandle = new AutoResetEvent(false);
         _queue = new ConcurrentQueue<SearchResult>();
 
@@ -110,9 +111,4 @@ public sealed class FileBasedResultRepository : IResultRepository, IDisposable
         _disposedValue = true;
     }
     #endregion
-}
-
-public class FileBasedResultRepositoryConfiguration
-{
-    public string OutputFilePath { get; init; } = string.Empty;
 }

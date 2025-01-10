@@ -3,12 +3,13 @@ using Microsoft.Extensions.Options;
 
 namespace MbUtils.TextSearch.Business;
 
+[RegisterSingleton]
 public class MainLogic(
     ILoggerFactory loggerFactory,
     IFilePathProvider filePathProvider,
     IFileInspector fileInspector,
     IResultRepository resultRepo,
-    IOptions<MainLogicConfiguration> config)
+    IOptions<AppConfig> config)
 {
     // injected services
     private readonly ILogger<MainLogic> _logger = loggerFactory.CreateLogger<MainLogic>();
@@ -77,9 +78,4 @@ public class MainLogic(
             throw new ArgumentException($"Input folder {inputFolderPath} doesn't exist", nameof(inputFolderPath));
     }
     #endregion
-}
-
-public class MainLogicConfiguration
-{
-    public int ParallelTasks { get; set; } = 1;
 }
