@@ -1,28 +1,31 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
 
 namespace MbUtils.TextSearch.Business;
 
 public sealed class FileBasedResultRepository : IResultRepository, IDisposable
 {
-    private readonly string _outputFilePath;
+    private readonly IOptions<FileBasedResultRepositoryConfiguration> _config;
     private readonly ConcurrentQueue<SearchResult> _queue;
     private readonly AutoResetEvent _waitHandle;
     private readonly ILogger<FileBasedResultRepository> _logger;
     private readonly CancellationTokenSource _tokenSource;
     private readonly CancellationToken _token;
 
-    public FileBasedResultRepository(ILoggerFactory loggerFactory, string outputFilePath)
+    public FileBasedResultRepository(ILoggerFactory loggerFactory, 
+        IOptions<FileBasedResultRepositoryConfiguration> config)
     {
+        _config = config;
         // validate output file and folder
         try
         {
-            var fileInfo = new FileInfo(outputFilePath);
+            var fileInfo = new FileInfo(config.Value.OutputFilePath);
             if (!fileInfo.Directory?.Exists ?? true)
                 fileInfo.Directory?.Create();
             if (fileInfo.Exists)
                 fileInfo.Delete();
-            File.WriteAllText(outputFilePath, $"Path,Match count{Environment.NewLine}");
+            File.WriteAllText(config.Value.OutputFilePath, $"Path,Match count{Environment.NewLine}");
         }
         catch (Exception ex)
         {
@@ -32,7 +35,6 @@ public sealed class FileBasedResultRepository : IResultRepository, IDisposable
 
         _logger = loggerFactory.CreateLogger<FileBasedResultRepository>();
         _waitHandle = new AutoResetEvent(false);
-        _outputFilePath = outputFilePath;
         _queue = new ConcurrentQueue<SearchResult>();
 
         _tokenSource = new CancellationTokenSource();
@@ -79,7 +81,7 @@ public sealed class FileBasedResultRepository : IResultRepository, IDisposable
 
     private void DoSave(SearchResult result)
     {
-        File.AppendAllText(_outputFilePath, $"\"{result.FilePath}\",{result.MatchCount}{Environment.NewLine}");
+        File.AppendAllText(_config.Value.OutputFilePath, $"\"{result.FilePath}\",{result.MatchCount}{Environment.NewLine}");
     }
 
     #region IDisposable Support
@@ -108,4 +110,9 @@ public sealed class FileBasedResultRepository : IResultRepository, IDisposable
         _disposedValue = true;
     }
     #endregion
+}
+
+public class FileBasedResultRepositoryConfiguration
+{
+    public string OutputFilePath { get; init; } = string.Empty;
 }
