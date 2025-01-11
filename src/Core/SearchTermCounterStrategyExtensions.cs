@@ -4,7 +4,7 @@ namespace Core;
 
 public static class SearchTermCounterStrategyExtensions
 {   
-    public static async Task<int> GetNumberOfMatchesAsync(this ISearchTermCounterStrategy strategy, Stream stream, string searchTerm, int bufferSize, Encoding encoding)
+    public static int GetNumberOfMatches(this ISearchTermCounterStrategy strategy, Stream stream, string searchTerm, int bufferSize, Encoding encoding)
     {
         // variables to remember
         var ret = 0;
@@ -15,7 +15,7 @@ public static class SearchTermCounterStrategyExtensions
 
         var partialMatchFromPreviousChunk = string.Empty;
 
-        while (await ReadNextChunkAsync(sr, buffer) is { } currentChunk)
+        while (ReadNextChunk(sr, buffer) is { } currentChunk)
         {
             // check if we have partial match from previous chunk
             if (!string.IsNullOrEmpty(partialMatchFromPreviousChunk))
@@ -63,10 +63,10 @@ public static class SearchTermCounterStrategyExtensions
         return ret;
     }
 
-    private static async Task<string?> ReadNextChunkAsync(StreamReader reader, char[] buffer)
+    private static string? ReadNextChunk(StreamReader reader, char[] buffer)
     {
         int readBytesCount;
-        return (readBytesCount = await reader.ReadBlockAsync(buffer, 0, buffer.Length)) > 0 
+        return (readBytesCount = reader.ReadBlock(buffer, 0, buffer.Length)) > 0 
             ? new string(buffer, 0, readBytesCount) 
             : null;
     }

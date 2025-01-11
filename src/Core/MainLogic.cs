@@ -28,14 +28,15 @@ public class MainLogic(
         if (config.Value.ParallelTasks > 1)
         {
             Parallel.ForEach(filePaths, new ParallelOptions { MaxDegreeOfParallelism = config.Value.ParallelTasks }, (filePath) => {
-                SearchAsync(filePath, searchTerm).Wait();
+                SearchAsync(filePath, searchTerm);
             });
         }
         else
         {
-            var taskList = filePaths.Select(item => SearchAsync(item, searchTerm)).ToList();
-
-            Task.WhenAll(taskList).Wait();
+            foreach (var filePath in filePaths)
+            {
+                SearchAsync(filePath, searchTerm);
+            }
         }
         
         watch.Stop();
@@ -49,13 +50,13 @@ public class MainLogic(
             );
     }
 
-    private async Task SearchAsync(string filePath, string searchTerm)
+    private void SearchAsync(string filePath, string searchTerm)
     {   
         // search
-        await using var fs = File.OpenRead(filePath);
+        using var fs = File.OpenRead(filePath);
         var streamLength = fs.Length;
         var encoding = config.Value.IsUtf8 ? Encoding.UTF8 : Encoding.ASCII;
-        var matchCount = await strategy.GetNumberOfMatchesAsync(fs, searchTerm, config.Value.BufferSize, encoding);
+        var matchCount = strategy.GetNumberOfMatches(fs, searchTerm, config.Value.BufferSize, encoding);
         // save the result
         resultRepo.SaveResult(new SearchResult(filePath, matchCount));
         
