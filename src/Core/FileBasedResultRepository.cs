@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Options;
 
-namespace MbUtils.TextSearch.Business;
+namespace Core;
 
 [RegisterSingleton]
 public sealed class FileBasedResultRepository : IResultRepository, IDisposable

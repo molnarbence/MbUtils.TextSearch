@@ -1,4 +1,4 @@
-﻿namespace MbUtils.TextSearch.Business.Strategies;
+﻿namespace Core.Strategies;
 
 public class StringSplitStrategy(string pattern) : ISearchTermCounterStrategy
 {

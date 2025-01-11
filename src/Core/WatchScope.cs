@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace MbUtils.TextSearch.Business;
+namespace Core;
 
 /// <summary>
 /// A helper class to measure execution time

@@ -1,6 +1,6 @@
 ﻿using MbUtils.Extensions.CommandLineUtils;
-using MbUtils.TextSearch.Business;
-using MbUtils.TextSearch.ConsoleHost;
+using Core;
+using ConsoleApp;
 using Microsoft.Extensions.DependencyInjection;
 
 var wrapper = new CommandLineApplicationWrapper<TextSearchApp>(args);
@@ -11,7 +11,7 @@ wrapper.HostBuilder.ConfigureServices((context, services) =>
         .Bind(context.Configuration)
         .ValidateOnStart();
 
-    services.AutoRegisterFromMbUtilsTextSearchBusiness();
+    services.AutoRegisterFromCore();
 });
 
 return await wrapper.ExecuteAsync();

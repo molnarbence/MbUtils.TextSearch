@@ -1,7 +1,7 @@
-﻿using MbUtils.TextSearch.Business.Strategies;
+﻿using Core.Strategies;
 using Microsoft.Extensions.Options;
 
-namespace MbUtils.TextSearch.Business;
+namespace Core;
 
 [RegisterSingleton]
 public class SearchTermCounterStrategyFactory(IOptions<AppConfig> config) : ISearchTermCounterStrategyFactory

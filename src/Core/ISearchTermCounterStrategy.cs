@@ -1,4 +1,4 @@
-﻿namespace MbUtils.TextSearch.Business;
+﻿namespace Core;
 
 public interface ISearchTermCounterStrategy
 {

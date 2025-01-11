@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace MbUtils.TextSearch.Business;
+namespace Core;
 
 [RegisterSingleton]
 public class MainLogic(

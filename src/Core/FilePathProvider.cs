@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace MbUtils.TextSearch.Business;
+namespace Core;
 
 [RegisterSingleton]
 public class FilePathProvider(ILogger<FilePathProvider> logger) : IFilePathProvider

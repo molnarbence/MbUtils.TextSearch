@@ -4,9 +4,9 @@ VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CB8349DD-9DD6-427A-8478-FFEE32EC7CED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MbUtils.TextSearch.ConsoleHost", "src\MbUtils.TextSearch.ConsoleHost\MbUtils.TextSearch.ConsoleHost.csproj", "{2DE3E9A6-5DE7-4252-BCB2-817B8120D609}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "src\ConsoleApp\ConsoleApp.csproj", "{2DE3E9A6-5DE7-4252-BCB2-817B8120D609}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MbUtils.TextSearch.Business", "src\MbUtils.TextSearch.Business\MbUtils.TextSearch.Business.csproj", "{3B9DFA23-7C1E-412B-8835-DC66825E9FA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "src\Core\Core.csproj", "{3B9DFA23-7C1E-412B-8835-DC66825E9FA3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7C625C69-01EB-4971-A274-370C64049C3D}"
 EndProject

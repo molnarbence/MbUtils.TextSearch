@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Options;
 
-namespace MbUtils.TextSearch.Business;
+namespace Core;
 
 [RegisterSingleton]
 public class FileInspector(IOptions<AppConfig> config, ISearchTermCounterStrategyFactory strategyFactory)

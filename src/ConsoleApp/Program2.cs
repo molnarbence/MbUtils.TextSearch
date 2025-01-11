@@ -1,9 +1,9 @@
-﻿using MbUtils.TextSearch.Business;
-using MbUtils.TextSearch.Business.Strategies;
+﻿using Core;
+using Core.Strategies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace MbUtils.TextSearch.ConsoleHost;
+namespace ConsoleApp;
 
 class Program2
 {

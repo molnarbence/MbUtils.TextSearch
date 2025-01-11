@@ -1,4 +1,4 @@
-﻿using MbUtils.TextSearch.Business;
+﻿using Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
