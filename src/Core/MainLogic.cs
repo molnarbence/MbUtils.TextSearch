@@ -6,7 +6,7 @@ namespace Core;
 [RegisterSingleton]
 public class MainLogic(
     IFilePathProvider filePathProvider,
-    IStreamInspector streamInspector,
+    StreamInspector streamInspector,
     IResultRepository resultRepo,
     IOptions<AppConfig> config)
 {

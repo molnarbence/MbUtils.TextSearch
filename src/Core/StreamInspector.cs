@@ -5,7 +5,6 @@ namespace Core;
 
 [RegisterSingleton]
 public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrategyFactory strategyFactory)
-    : IStreamInspector
 {
     private readonly Encoding _encoding = config.Value.IsUtf8 ? Encoding.UTF8 : Encoding.ASCII;
     
