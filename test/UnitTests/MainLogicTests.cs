@@ -1,5 +1,5 @@
 ﻿using Core;
-using Microsoft.Extensions.Logging;
+using Core.Strategies;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 
@@ -62,13 +62,15 @@ public class MainLogicTests
             Strategy = strategy
         });
 
-        var loggerFactory = new LoggerFactory();
         var filePathProvider = new FilePathProvider();
-        var strategyFactory = new SearchTermCounterStrategyFactory(appConfig);
+        
+        ISearchTermCounterStrategy s = strategy switch {
+            "Regex" => new RegexStrategy(),
+            "KnuthMorrisPratt" => new KnuthMorrisPratt(),
+            "StringSplit" => new StringSplitStrategy(),
+            _ => throw new ArgumentException("Invalid strategy")
+        };
 
-        var fileInspector = new StreamInspector(appConfig, strategyFactory);
-
-
-        return new MainLogic(filePathProvider, fileInspector, _resultRepo, appConfig);
+        return new MainLogic(filePathProvider, s, _resultRepo, appConfig);
     }
 }

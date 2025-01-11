@@ -6,17 +6,7 @@
 /// </summary>
 public class KnuthMorrisPratt : ISearchTermCounterStrategy
 {
-    private readonly int[] _lpsArray;
-    private readonly string _pattern;
-
-    public KnuthMorrisPratt(string pattern)
-    {
-        if (string.IsNullOrEmpty(pattern))
-            throw new ArgumentNullException(nameof(pattern));
-
-        _pattern = pattern;
-        _lpsArray = ComputeLpsArray(pattern, pattern.Length);
-    }
+    private static int[]? _lpsArray;
 
     private static int[] ComputeLpsArray(string pat, int m)
     {
@@ -51,17 +41,19 @@ public class KnuthMorrisPratt : ISearchTermCounterStrategy
         return lps;
     }
 
-    public int Count(string input)
+    public int Count(string input, string pattern)
     {
+        _lpsArray ??= ComputeLpsArray(pattern, pattern.Length);
+
         var retVal = new List<int>();
-        var patternLength = _pattern.Length;
+        var patternLength = pattern.Length;
         var inputLength = input.Length;
         var i = 0;
         var j = 0;
 
         while (i < inputLength)
         {
-            if (_pattern[j] == input[i])
+            if (pattern[j] == input[i])
             {
                 j++;
                 i++;
@@ -73,7 +65,7 @@ public class KnuthMorrisPratt : ISearchTermCounterStrategy
                 j = _lpsArray[j - 1];
             }
 
-            else if (i < inputLength && _pattern[j] != input[i])
+            else if (i < inputLength && pattern[j] != input[i])
             {
                 if (j != 0)
                     j = _lpsArray[j - 1];

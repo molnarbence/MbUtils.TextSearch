@@ -1,6 +1,6 @@
 ﻿namespace Core.Strategies;
 
-public class StringSplitStrategy(string pattern) : ISearchTermCounterStrategy
+public class StringSplitStrategy : ISearchTermCounterStrategy
 {
-    public int Count(string input) => input.Split([pattern], StringSplitOptions.None).Length - 1;
+    public int Count(string input, string pattern) => input.Split([pattern], StringSplitOptions.None).Length - 1;
 }

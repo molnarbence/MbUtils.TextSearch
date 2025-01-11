@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Microsoft.Extensions.Options;
 
 namespace Core;
@@ -6,7 +7,7 @@ namespace Core;
 [RegisterSingleton]
 public class MainLogic(
     IFilePathProvider filePathProvider,
-    StreamInspector streamInspector,
+    ISearchTermCounterStrategy strategy,
     IResultRepository resultRepo,
     IOptions<AppConfig> config)
 {
@@ -53,7 +54,8 @@ public class MainLogic(
         // search
         await using var fs = File.OpenRead(filePath);
         var streamLength = fs.Length;
-        var matchCount = await streamInspector.GetNumberOfMatchesAsync(fs, searchTerm);
+        var encoding = config.Value.IsUtf8 ? Encoding.UTF8 : Encoding.ASCII;
+        var matchCount = await strategy.GetNumberOfMatchesAsync(fs, searchTerm, config.Value.BufferSize, encoding);
         // save the result
         resultRepo.SaveResult(new SearchResult(filePath, matchCount));
         

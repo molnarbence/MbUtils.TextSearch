@@ -2,5 +2,5 @@
 
 public interface ISearchTermCounterStrategy
 {
-    int Count(string input);
+    int Count(string input, string pattern);
 }

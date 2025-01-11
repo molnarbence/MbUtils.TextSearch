@@ -1,6 +1,5 @@
 ﻿using Core;
 using McMaster.Extensions.CommandLineUtils;
-using Microsoft.Extensions.Options;
 
 namespace ConsoleApp;
 

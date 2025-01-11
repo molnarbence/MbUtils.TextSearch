@@ -2,9 +2,7 @@
 
 namespace Core.Strategies;
 
-public class RegexStrategy(string pattern) : ISearchTermCounterStrategy
+public class RegexStrategy : ISearchTermCounterStrategy
 {
-    private readonly Regex _regex = new(Regex.Escape(pattern));
-
-    public int Count(string input) => _regex.Matches(input).Count;
+    public int Count(string input, string pattern) => Regex.Matches(input, Regex.Escape(pattern)).Count;
 }

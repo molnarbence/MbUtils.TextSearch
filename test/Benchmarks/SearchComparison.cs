@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Core;
 using Core.Strategies;
 
 namespace Benchmarks;
@@ -7,9 +6,9 @@ namespace Benchmarks;
 public class SearchComparison
 {
     private const string Pattern = "target";
-    private readonly StringSplitStrategy _stringSplitStrategy = new(Pattern);
-    private readonly KnuthMorrisPratt _knuthMorrisPratt = new(Pattern);
-    private readonly RegexStrategy _regexStrategy = new(Pattern);
+    private readonly StringSplitStrategy _stringSplitStrategy = new();
+    private readonly KnuthMorrisPratt _knuthMorrisPratt = new();
+    private readonly RegexStrategy _regexStrategy = new();
 
     private string _input = string.Empty;
     
@@ -40,11 +39,11 @@ public class SearchComparison
     }
 
     [Benchmark(Baseline = true)]
-    public int StringSplit() => _stringSplitStrategy.Count(_input);
+    public int StringSplit() => _stringSplitStrategy.Count(_input, Pattern);
 
     [Benchmark]
-    public int KnuthMorrisPratt() => _knuthMorrisPratt.Count(_input);
+    public int KnuthMorrisPratt() => _knuthMorrisPratt.Count(_input, Pattern);
 
     [Benchmark]
-    public int Regex() => _regexStrategy.Count(_input);
+    public int Regex() => _regexStrategy.Count(_input, Pattern);
 }

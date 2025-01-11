@@ -1,22 +1,17 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Options;
 
 namespace Core;
 
-[RegisterSingleton]
-public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrategyFactory strategyFactory)
-{
-    private readonly Encoding _encoding = config.Value.IsUtf8 ? Encoding.UTF8 : Encoding.ASCII;
-    
-    public async Task<int> GetNumberOfMatchesAsync(Stream stream, string searchTerm)
+public static class SearchTermCounterStrategyExtensions
+{   
+    public static async Task<int> GetNumberOfMatchesAsync(this ISearchTermCounterStrategy strategy, Stream stream, string searchTerm, int bufferSize, Encoding encoding)
     {
         // variables to remember
         var ret = 0;
         var searchTermLength = searchTerm.Length;
-        var buffer = new char[config.Value.BufferSize]; // to reuse buffer multiple times
-        var strategy = strategyFactory.Create(searchTerm);
-
-        using var sr = new StreamReader(stream, _encoding, true);
+        var buffer = new char[bufferSize]; // to reuse buffer multiple times
+        
+        using var sr = new StreamReader(stream, encoding, true);
 
         var partialMatchFromPreviousChunk = string.Empty;
 
@@ -38,7 +33,7 @@ public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrat
             }
 
             // count matches
-            var count = strategy.Count(currentChunk);
+            var count = strategy.Count(currentChunk, searchTerm);
 
             // some variables to remember
             var chunkLength = currentChunk.Length;
