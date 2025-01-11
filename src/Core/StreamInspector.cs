@@ -4,8 +4,8 @@ using Microsoft.Extensions.Options;
 namespace Core;
 
 [RegisterSingleton]
-public class FileInspector(IOptions<AppConfig> config, ISearchTermCounterStrategyFactory strategyFactory)
-    : IFileInspector
+public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrategyFactory strategyFactory)
+    : IStreamInspector
 {
     private readonly Encoding _encoding = config.Value.IsUtf8 ? Encoding.UTF8 : Encoding.ASCII;
 
@@ -28,7 +28,7 @@ public class FileInspector(IOptions<AppConfig> config, ISearchTermCounterStrateg
         await using var fs = File.OpenRead(filePath);
         using var sr = new StreamReader(fs, _encoding, true);
 
-        var partialMatchFromPreviousChunk = default(string);
+        var partialMatchFromPreviousChunk = string.Empty;
 
         while (await ReadNextChunkAsync(sr, buffer) is { } currentChunk)
         {
@@ -44,7 +44,7 @@ public class FileInspector(IOptions<AppConfig> config, ISearchTermCounterStrateg
                     ret++;
 
                 // reset partial match
-                partialMatchFromPreviousChunk = null;
+                partialMatchFromPreviousChunk = string.Empty;
             }
 
             // count matches

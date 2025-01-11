@@ -66,7 +66,7 @@ public class MainLogicTests
         var filePathProvider = new FilePathProvider(loggerFactory.CreateLogger<FilePathProvider>());
         var strategyFactory = new SearchTermCounterStrategyFactory(appConfig);
 
-        var fileInspector = new FileInspector(appConfig, strategyFactory);
+        var fileInspector = new StreamInspector(appConfig, strategyFactory);
 
 
         return new MainLogic(loggerFactory, filePathProvider, fileInspector, _resultRepo, appConfig);

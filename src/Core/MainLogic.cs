@@ -7,7 +7,7 @@ namespace Core;
 public class MainLogic(
     ILoggerFactory loggerFactory,
     IFilePathProvider filePathProvider,
-    IFileInspector fileInspector,
+    IStreamInspector streamInspector,
     IResultRepository resultRepo,
     IOptions<AppConfig> config)
 {
@@ -44,7 +44,7 @@ public class MainLogic(
         try
         {
             // search
-            var matchCount = await fileInspector.GetNumberOfMatchesAsync(filePath, searchTerm);
+            var matchCount = await streamInspector.GetNumberOfMatchesAsync(filePath, searchTerm);
             // save the result
             resultRepo.SaveResult(new SearchResult(filePath, matchCount));
         }

@@ -44,7 +44,7 @@ class Program2
             
             var strategyFactory = new SearchTermCounterStrategyFactory(appConfig);
             
-            var fileInspector = new FileInspector(appConfig, strategyFactory);
+            var fileInspector = new StreamInspector(appConfig, strategyFactory);
 
             var fileBasedResultRepositoryLogger = new Logger<FileBasedResultRepository>(loggerFactory);
             var resultRepo = new FileBasedResultRepository(fileBasedResultRepositoryLogger, appConfig);
