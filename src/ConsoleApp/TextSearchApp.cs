@@ -14,8 +14,15 @@ public class TextSearchApp
     public required string SearchTerm { get; set; }
     
     private void OnExecute(
-        MainLogic mainLogic)
+        MainLogic mainLogic, IConsole console)
     {
-        mainLogic.Search(InputFolderPath, SearchTerm);
+        var statistics = mainLogic.Search(InputFolderPath, SearchTerm);
+        
+        console.WriteLine($"               Buffer size: {statistics.BufferSize}");
+        console.WriteLine($" Max degree of parallelism: {statistics.ParallelTasks}");
+        console.WriteLine($"                  Strategy: {statistics.Strategy}");
+        console.WriteLine($"          Total bytes read: {statistics.TotalBytesRead} ({statistics.TotalMegabytesRead:00.00} MB)");
+        console.WriteLine($"        Total milliseconds: {statistics.TotalMilliseconds}");
+        console.WriteLine($"            Avg. exec rate: {statistics.ReadRateInBytesPerSecond} bytes/s ({statistics.ReadRateInMegabytesPerSecond:0.00} MB/s)");
     }
 }

@@ -8,15 +8,7 @@ public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrat
     : IStreamInspector
 {
     private readonly Encoding _encoding = config.Value.IsUtf8 ? Encoding.UTF8 : Encoding.ASCII;
-
-    // Total read bytes, for statistics
-    private long _totalReadBytesCount;
-    private void AddReadBytesCount(long count)
-    {
-        Interlocked.Add(ref _totalReadBytesCount, count);
-    }
-    public long TotalReadBytesCount => _totalReadBytesCount;
-
+    
     public async Task<int> GetNumberOfMatchesAsync(Stream stream, string searchTerm)
     {
         // variables to remember
@@ -73,9 +65,6 @@ public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrat
             // increment match count
             ret += count;
         }
-
-        // add read bytes count (for statistics)
-        AddReadBytesCount(stream.Length);
 
         return ret;
     }

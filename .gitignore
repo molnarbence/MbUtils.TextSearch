@@ -290,3 +290,4 @@ __pycache__/
 # app specific
 appoutput/
 test/Benchmarks/BenchmarkDotNet.Artifacts/
+src/ConsoleApp/appsettings.user.json
