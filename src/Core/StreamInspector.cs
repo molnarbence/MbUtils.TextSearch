@@ -17,7 +17,7 @@ public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrat
     }
     public long TotalReadBytesCount => _totalReadBytesCount;
 
-    public async Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm)
+    public async Task<int> GetNumberOfMatchesAsync(Stream stream, string searchTerm)
     {
         // variables to remember
         var ret = 0;
@@ -25,8 +25,7 @@ public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrat
         var buffer = new char[config.Value.BufferSize]; // to reuse buffer multiple times
         var strategy = strategyFactory.Create(searchTerm);
 
-        await using var fs = File.OpenRead(filePath);
-        using var sr = new StreamReader(fs, _encoding, true);
+        using var sr = new StreamReader(stream, _encoding, true);
 
         var partialMatchFromPreviousChunk = string.Empty;
 
@@ -76,7 +75,7 @@ public class StreamInspector(IOptions<AppConfig> config, ISearchTermCounterStrat
         }
 
         // add read bytes count (for statistics)
-        AddReadBytesCount(fs.Length);
+        AddReadBytesCount(stream.Length);
 
         return ret;
     }

@@ -2,5 +2,5 @@
 
 public interface IStreamInspector
 {
-    Task<int> GetNumberOfMatchesAsync(string filePath, string searchTerm);
+    Task<int> GetNumberOfMatchesAsync(Stream stream, string searchTerm);
 }

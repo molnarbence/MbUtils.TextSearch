@@ -1,5 +1,4 @@
 ﻿using Core;
-using Core.Strategies;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -7,9 +6,8 @@ namespace ConsoleApp;
 
 class Program2
 {
-    const int BUFFERSIZE = 1 * 1024 * 1024;
-    const int PARALLELISM = 2;
-    const int STRATEGY = 1;
+    private const int BufferSize = 1 * 1024 * 1024;
+    private const int Parallelism = 2;
 
     public static void Main2(string[] args)
     {
@@ -29,17 +27,16 @@ class Program2
         {
             // wire up the application. In a bigger environment this part would be the DI container setup
             var loggerFactory = new LoggerFactory();
-            var filePathLogger = new Logger<FilePathProvider>(loggerFactory);
-            var filePathProvider = new FilePathProvider(filePathLogger);
+            var filePathProvider = new FilePathProvider();
 
 
             // a bit more setup of services
             var appConfig = Options.Create(new AppConfig
             {
                 IsUtf8 = true,
-                BufferSize = BUFFERSIZE,
+                BufferSize = BufferSize,
                 OutputFilePath = outputFilePath,
-                ParallelTasks = PARALLELISM
+                ParallelTasks = Parallelism
             });
             
             var strategyFactory = new SearchTermCounterStrategyFactory(appConfig);
@@ -49,7 +46,7 @@ class Program2
             var fileBasedResultRepositoryLogger = new Logger<FileBasedResultRepository>(loggerFactory);
             var resultRepo = new FileBasedResultRepository(fileBasedResultRepositoryLogger, appConfig);
 
-            var mainLogic = new MainLogic(loggerFactory, filePathProvider, fileInspector, resultRepo, appConfig);
+            var mainLogic = new MainLogic(filePathProvider, fileInspector, resultRepo, appConfig);
 
             // call the search, and measure the execution time
             var totalMilliseconds = 0L;
@@ -63,8 +60,8 @@ class Program2
             var totalMbRead = totalBytesRead / (1000 * 1000);
             var readRate = (totalBytesRead * 1000) / Math.Max(1, totalMilliseconds);
             var readRateInMb = readRate / (1000 * 1000);
-            Console.WriteLine($"               Buffer size: {BUFFERSIZE}");
-            Console.WriteLine($" Max degree of parallelism: {PARALLELISM}");
+            Console.WriteLine($"               Buffer size: {BufferSize}");
+            Console.WriteLine($" Max degree of parallelism: {Parallelism}");
             Console.WriteLine($"                  Strategy: {appConfig.Value.Strategy}");
             Console.WriteLine($"          Total bytes read: {totalBytesRead} ({totalMbRead:00.00} MB)");
             Console.WriteLine($"        Total milliseconds: {totalMilliseconds}");

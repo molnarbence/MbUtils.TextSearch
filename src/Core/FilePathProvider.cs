@@ -1,22 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace Core;
+﻿namespace Core;
 
 [RegisterSingleton]
-public class FilePathProvider(ILogger<FilePathProvider> logger) : IFilePathProvider
+public class FilePathProvider : IFilePathProvider
 {
     public IEnumerable<string> GetFilePaths(string rootFolderPath)
     {
         // try to enumerate folder files
-        IEnumerable<string> files = [];
-        try
-        {
-            files = Directory.EnumerateFiles(rootFolderPath);
-        }
-        catch (Exception ex)
-        {
-            logger.LogDebug("{RootFolderPath}: {Message}", rootFolderPath, ex.Message);
-        }
+        var files = Directory.EnumerateFiles(rootFolderPath);
 
         // return files if any
         foreach (var item in files)
@@ -25,15 +15,7 @@ public class FilePathProvider(ILogger<FilePathProvider> logger) : IFilePathProvi
         }
 
         // try enumerate folders
-        IEnumerable<string> folders = [];
-        try
-        {
-            folders = Directory.EnumerateDirectories(rootFolderPath);
-        }
-        catch (Exception ex)
-        {
-            logger.LogDebug("{RootFolderPath}: Can't enumerate directories. {ExceptionMessage}", rootFolderPath, ex.Message);
-        }
+        var folders = Directory.EnumerateDirectories(rootFolderPath);
 
         foreach (var item in folders)
         {

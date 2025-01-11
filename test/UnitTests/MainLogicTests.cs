@@ -63,12 +63,12 @@ public class MainLogicTests
         });
 
         var loggerFactory = new LoggerFactory();
-        var filePathProvider = new FilePathProvider(loggerFactory.CreateLogger<FilePathProvider>());
+        var filePathProvider = new FilePathProvider();
         var strategyFactory = new SearchTermCounterStrategyFactory(appConfig);
 
         var fileInspector = new StreamInspector(appConfig, strategyFactory);
 
 
-        return new MainLogic(loggerFactory, filePathProvider, fileInspector, _resultRepo, appConfig);
+        return new MainLogic(filePathProvider, fileInspector, _resultRepo, appConfig);
     }
 }
