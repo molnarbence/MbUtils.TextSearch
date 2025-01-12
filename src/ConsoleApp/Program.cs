@@ -19,18 +19,7 @@ wrapper.HostBuilder.ConfigureServices((context, services) =>
         .Bind(context.Configuration)
         .ValidateOnStart();
 
-    services.AutoRegisterFromCore()
-        .AddSingleton<ISearchTermCounterStrategy>(serviceProvider =>
-        {
-            var config = serviceProvider.GetRequiredService<IOptions<AppConfig>>();
-            return config.Value.Strategy switch
-            {
-                "Regex" => new RegexStrategy(),
-                "KnuthMorrisPratt" => new KnuthMorrisPratt(),
-                "StringSplit" => new StringSplitStrategy(),
-                _ => throw new NotSupportedException($"Strategy '{config.Value.Strategy}' is not supported.")
-            };
-        });
+    services.AddCore();
 });
 
 return await wrapper.ExecuteAsync();

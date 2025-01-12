@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 
 namespace Core;
 
-[RegisterSingleton]
 public sealed class FileBasedResultRepository : IResultRepository, IDisposable
 {
     private readonly IOptions<AppConfig> _config;
@@ -19,21 +18,14 @@ public sealed class FileBasedResultRepository : IResultRepository, IDisposable
     {
         _config = config;
         _logger = logger;
+        
         // validate output file and folder
-        try
-        {
-            var fileInfo = new FileInfo(config.Value.OutputFilePath);
-            if (!fileInfo.Directory?.Exists ?? true)
-                fileInfo.Directory?.Create();
-            if (fileInfo.Exists)
-                fileInfo.Delete();
-            File.WriteAllText(config.Value.OutputFilePath, $"Path,Match count{Environment.NewLine}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug("Output file cannot be written, {ExceptionMessage}", ex.Message);
-            throw new ArgumentException("Output file cannot be written");
-        }
+        var fileInfo = new FileInfo(config.Value.OutputFilePath);
+        if (!fileInfo.Directory?.Exists ?? true)
+            fileInfo.Directory?.Create();
+        if (fileInfo.Exists)
+            fileInfo.Delete();
+        File.WriteAllText(config.Value.OutputFilePath, $"Path,Match count{Environment.NewLine}");
 
         _waitHandle = new AutoResetEvent(false);
         _queue = new ConcurrentQueue<SearchResult>();
@@ -80,10 +72,8 @@ public sealed class FileBasedResultRepository : IResultRepository, IDisposable
             
     }
 
-    private void DoSave(SearchResult result)
-    {
-        File.AppendAllText(_config.Value.OutputFilePath, $"\"{result.FilePath}\",{result.MatchCount}{Environment.NewLine}");
-    }
+    private void DoSave(SearchResult result) 
+        => File.AppendAllText(_config.Value.OutputFilePath, $"\"{result.FilePath}\",{result.MatchCount}{Environment.NewLine}");
 
     #region IDisposable Support
     private bool _disposedValue;

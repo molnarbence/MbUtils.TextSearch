@@ -1,9 +1,8 @@
 ﻿namespace Core;
 
-[RegisterSingleton]
-public class FilePathProvider : IFilePathProvider
+public static class FilePathProvider
 {
-    public IEnumerable<string> GetFilePaths(string rootFolderPath)
+    public static IEnumerable<string> GetFilePaths(string rootFolderPath)
     {
         // try to enumerate folder files
         var files = Directory.EnumerateFiles(rootFolderPath);

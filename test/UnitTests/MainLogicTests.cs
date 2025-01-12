@@ -50,7 +50,6 @@ public class MainLogicTests
         _resultRepo.Received().SaveResult(new SearchResult(Path.Combine(InputFolderPath, "file1.txt"), 6));
         _resultRepo.Received().SaveResult(new SearchResult(Path.Combine(InputFolderPath, "file2.txt"), 11));
     }
-
     private MainLogic CreateMainLogic(string strategy, int bufferSize)
     {
         var appConfig = Options.Create(new AppConfig
@@ -61,8 +60,6 @@ public class MainLogicTests
             OutputFilePath = "",
             Strategy = strategy
         });
-
-        var filePathProvider = new FilePathProvider();
         
         ISearchTermCounterStrategy s = strategy switch {
             "Regex" => new RegexStrategy(),
@@ -71,6 +68,6 @@ public class MainLogicTests
             _ => throw new ArgumentException("Invalid strategy")
         };
 
-        return new MainLogic(filePathProvider, s, _resultRepo, appConfig);
+        return new MainLogic(s, _resultRepo, appConfig);
     }
 }

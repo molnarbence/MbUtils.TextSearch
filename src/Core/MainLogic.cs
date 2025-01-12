@@ -4,9 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace Core;
 
-[RegisterSingleton]
 public class MainLogic(
-    IFilePathProvider filePathProvider,
     ISearchTermCounterStrategy strategy,
     IResultRepository resultRepo,
     IOptions<AppConfig> config)
@@ -23,7 +21,7 @@ public class MainLogic(
         var watch = Stopwatch.StartNew();
         
         // get file paths (as enumerable)
-        var filePaths = filePathProvider.GetFilePaths(inputFolderPath);
+        var filePaths = FilePathProvider.GetFilePaths(inputFolderPath);
 
         if (config.Value.ParallelTasks > 1)
         {
