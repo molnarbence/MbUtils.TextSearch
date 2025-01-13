@@ -11,11 +11,16 @@ Application.Init();
 RxApp.MainThreadScheduler = TerminalScheduler.Default;
 RxApp.TaskpoolScheduler = TaskPoolScheduler.Default;
 
-Application.Run<MainWindow>().Dispose();
+var searchFormViewModel = new SearchFormViewModel();
+var statisticsViewModel = new StatisticsViewModel();
+
+searchFormViewModel.Search.Subscribe(statisticsViewModel.UpdateStatistics);
+
+var mainWindow = new MainWindow(searchFormViewModel, statisticsViewModel);
+
+Application.Run(mainWindow);
+
+mainWindow.Dispose();
 
 // Before the application exits, reset Terminal.Gui for clean shutdown
-Application.Shutdown ();
-
-// To see this output on the screen it must be done after shutdown,
-// which restores the previous screen.
-Console.WriteLine ($"Username: {MainWindow.SearchTerm}");
+Application.Shutdown();
